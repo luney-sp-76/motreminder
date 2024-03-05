@@ -11,6 +11,10 @@
 	<groupId>com.motbookingreminder</groupId>
 	<artifactId>api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<modules>
+		<module>api</module>
+	</modules>
 	<name>api</name>
 	<description>MOT Booking Reminder Project</description>
 	<properties>
