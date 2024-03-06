@@ -17,5 +17,6 @@ public class FirestoreService {
     // Example method to demonstrate usage
     public void exampleMethod() {
         // Use the Firestore instance to interact with your database
+        firestore.collection("exampleCollection").document("exampleDocument").set(new Object());
     }
 }
