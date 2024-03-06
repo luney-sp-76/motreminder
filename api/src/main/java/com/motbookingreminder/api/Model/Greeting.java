@@ -1,4 +1,4 @@
-package com.motbookingreminder.api.Model;
+package com.motbookingreminder.api.model;
 
 public class Greeting {
     private final long id;

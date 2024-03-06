@@ -1,10 +1,12 @@
-package com.motbookingreminder.api.Controller;
+package com.motbookingreminder.api.controller;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.motbookingreminder.api.Model.Greeting;
-import java.util.concurrent.atomic.AtomicLong;
+
+import com.motbookingreminder.api.model.Greeting;
 
 @RestController
 public class GreetingController {
