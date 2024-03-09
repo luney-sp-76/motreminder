@@ -1,3 +1,6 @@
+/**
+    * Initializes the Firestore service by setting up the FirebaseApp with the provided service account key.
+    */
 package com.motbookingreminder.firestore;
 
 import com.google.auth.oauth2.GoogleCredentials;
