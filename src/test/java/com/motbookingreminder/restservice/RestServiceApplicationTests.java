@@ -1,10 +1,10 @@
-package com.motbookingreminder.api;
+package com.motbookingreminder.restservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApiApplicationTests {
+class RestServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
