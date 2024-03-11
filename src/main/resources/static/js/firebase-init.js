@@ -1,7 +1,6 @@
 
 // firebase-init.js
 import {initializeApp}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
-import  {getAnalytics}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js';
 import  {getAuth}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
 import  {getFirestore}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
 
@@ -20,9 +19,8 @@ import  {getFirestore}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase
 const app = initializeApp(firebaseConfig);
 
 // Optionally initialize services
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Export for use in other modules
-export { app, analytics, auth, db };
+export { app, auth, db };
