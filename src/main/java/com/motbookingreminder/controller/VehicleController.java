@@ -3,10 +3,8 @@ package com.motbookingreminder.controller;
 import org.springframework.web.bind.annotation.*;
 import com.google.gson.Gson;
 import com.motbookingreminder.model.Car;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Controller
