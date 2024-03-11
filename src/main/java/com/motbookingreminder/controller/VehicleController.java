@@ -25,6 +25,13 @@ public class VehicleController {
     @PostMapping("/vehicles")
     public String getVehicleDetails(@RequestParam("registrationNumber") String registrationNumber, Model model) {
         String jsonResponse = vehicleService.getVehicleDetails(registrationNumber);
+
+        if (jsonResponse.equals(
+                "Please check the registration number and try again. If the problem persists, contact support.")) {
+            model.addAttribute("errorMessage", jsonResponse);
+            return "numberPlate";
+        }
+
         Car car = new Gson().fromJson(jsonResponse, Car.class);
 
         Date motExpiryDate = car.getMotExpiryDate(); // Assuming this returns a java.util.Date
