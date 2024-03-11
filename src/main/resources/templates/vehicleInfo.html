@@ -65,7 +65,15 @@
         <!-- Placeholder Message, Bottom Center -->
         <div class="row justify-content-center">
             <div class="col-md-12 text-center mt-4">
-                <p th:text="${placeholderMessage}" style="color:rgb(85, 0, 255); font-weight:bold;"></p>
+                <div th:if="${placeholderMessage}">
+                    <p th:text="${placeholderMessage}" class="alert alert-info" role="alert"></p>
+                    <div th:switch="${placeholderMessage}">
+                        <a th:case="'Book your MOT today'" href="https://www.gov.uk/getting-an-mot/booking-an-mot" class="btn btn-warning btn-lg">Book Now</a>
+                        <a th:case="'Set a Reminder'" href="/reminder" class="btn btn-success btn-lg">Set Reminder</a>
+                        <!-- Default action if none of the above messages match -->
+                        <a th:case="*" href="/index" class="btn btn-secondary btn-lg">Home</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
