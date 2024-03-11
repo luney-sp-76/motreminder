@@ -48,6 +48,7 @@ public class VehicleService {
             ApiErrorResponse apiError = gson.fromJson(errorBody, ApiErrorResponse.class);
 
             // Optionally log the error or handle it based on the status code
+
             throw new CustomApplicationException(apiError.getMessage(), e.getStatusCode());
         } catch (RestClientException e) {
             throw new CustomApplicationException("A connectivity issue occurred", HttpStatus.SERVICE_UNAVAILABLE);

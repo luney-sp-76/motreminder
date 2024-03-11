@@ -5,7 +5,7 @@
 </head>
 <body>
     <h2>Enter Vehicle Registration Number</h2>
-    <p th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></p>
+    <div th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></div>
     <form action="/vehicles" method="post">
         <label for="registrationNumber">Registration Number:</label>
         <input type="text" id="registrationNumber" name="registrationNumber">
