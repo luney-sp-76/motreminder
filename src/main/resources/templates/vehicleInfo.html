@@ -1,10 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Vehicle MOT Date</title>
+    <title>Your Car Details</title>
 </head>
 <body>
     <h2>Vehicle MOT Date</h2>
     <p>MOT Date: <span th:text="${motDate}"></span></p>
+    <h2>Vehicle Tax Due Date</h2>
+    <p>Tax Due Date: <span th:text="${taxDate}"></span></p>
+    <h2>Vehicle Details</h2>
+    <p>Make: <span th:text="${carMake}"></span></p>
+    <p>Colour: <span th:text="${carColour}"></span></p>
+    <p>Year: <span th:text="${carYear}"></span></p>
+    <p>Fuel: <span th:text="${carFuel}"></span></p>
+    <p>Engine Size: <span th:text="${carEngineSize}"></span></p>
 </body>
 </html>

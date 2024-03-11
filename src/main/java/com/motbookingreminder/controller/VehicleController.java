@@ -22,9 +22,18 @@ public class VehicleController {
         String jsonResponse = vehicleService.getVehicleDetails(registrationNumber);
         Car car = new Gson().fromJson(jsonResponse, Car.class);
 
-        // Assuming Car class has a method getMotStatus() that returns the MOT date as
+        // Assuming Car class has a method getMotExpiryDate() that returns the MOT date
+        // as
         // String
         model.addAttribute("motDate", car.getMotExpiryDate());
+        model.addAttribute("taxDate", car.getTaxDueDate());
+        model.addAttribute("carMake", car.getMake());
+        model.addAttribute("carClass", car.getClass());
+        model.addAttribute("carYear", car.getYearOfManufacture());
+        model.addAttribute("carFuel", car.getFuelType());
+        model.addAttribute("carColour", car.getColour());
+        model.addAttribute("carEngineSize", car.getEngineCapacity());
+
         return "vehicleInfo"; // Name of the HTML file to display the MOT date
     }
 }
