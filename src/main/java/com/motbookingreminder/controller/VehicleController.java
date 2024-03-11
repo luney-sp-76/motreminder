@@ -24,7 +24,7 @@ public class VehicleController {
 
         // Assuming Car class has a method getMotStatus() that returns the MOT date as
         // String
-        model.addAttribute("motDate", car.getMotStatus());
+        model.addAttribute("motDate", car.getMotExpiryDate());
         return "vehicleInfo"; // Name of the HTML file to display the MOT date
     }
 }
