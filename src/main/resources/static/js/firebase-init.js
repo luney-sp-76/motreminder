@@ -1,14 +1,13 @@
 
-  // Import the functions you need from the SDKs you need
-  import initializeApp from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import getAnalytics from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+// firebase-init.js
+import {initializeApp}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
+import  {getAnalytics}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js';
+import  {getAuth}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
+import  {getFirestore}  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyC70rJCPcUrMqdNC2647bk7n6pnLOqXio4",
+  const firebaseConfig = 
+  {
+  apiKey: "AIzaSyC70rJCPcUrMqdNC2647bk7n6pnLOqXio4",
     authDomain: "motbookingreminder.firebaseapp.com",
     projectId: "motbookingreminder",
     storageBucket: "motbookingreminder.appspot.com",
@@ -17,8 +16,13 @@
     measurementId: "G-WHN3BH6RRZ"
   };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-  // firebase-init.js ends here
+// Optionally initialize services
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Export for use in other modules
+export { app, analytics, auth, db };
