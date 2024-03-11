@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 @Service
 public class VehicleService {
 
-    @Value("${api.key}") // Assuming you have your API key in application.properties/yml
+    @Value("${api.key}")
     private String apiKey;
 
     private final RestTemplate restTemplate;
