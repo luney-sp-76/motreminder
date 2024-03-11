@@ -3,10 +3,18 @@
 <head>
     <title>Break Down Service</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+    <div th:replace=({navbar :: common-navbar})></div>
+
     <h1>Something went wrong with your service</h1>
     <a href="/motcheck">Go back to check your vehicle again</a>
     <p th:text="${errorMessage}" style="color:red;"></p>
+
+    <!-- Include Bootstrap's JavaScript and dependencies at the end of the body for better page load performance -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

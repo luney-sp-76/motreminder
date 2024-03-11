@@ -30,6 +30,7 @@
     </style>
 </head>
 <body>
+    <div th:replace=({navbar :: common-navbar})></div>
     <div class="form-container text-center">
         <h2>Enter Vehicle Registration Number</h2>
         <div th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></div>
@@ -41,6 +42,11 @@
             <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
         </form>
     </div>
+      <!-- Include Bootstrap's JavaScript and dependencies at the end of the body for better page load performance -->
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
 </body>
 </html>
 

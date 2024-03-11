@@ -9,32 +9,22 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .vehicle-details-card {
+            background-color: #e3f2fd; /* Light blue background */
+        }
+        .mot-tax-details-card {
+            background-color: #e8f5e9; /* Pale green background */
+        }
+    </style>
 </head>
 <body>
+    <div th:replace=({navbar :: common-navbar})></div>
     <div class="container my-5">
-        <div class="row justify-content-center">
-            <!-- Vehicle MOT Date Card -->
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-header">Vehicle MOT Date</div>
-                    <div class="card-body">
-                        <p>MOT Date: <span th:text="${motDate}"></span></p>
-                        <p>MOT Status: <span th:text="${motStatus}"></span></p>
-                    </div>
-                </div>
-            </div>
-            <!-- Vehicle Tax Due Date Card -->
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-header">Vehicle Tax Due Date</div>
-                    <div class="card-body">
-                        <p>Tax Due Date: <span th:text="${taxDate}"></span></p>
-                    </div>
-                </div>
-            </div>
-            <!-- Vehicle Details Card -->
-            <div class="col-md-6 mb-3">
-                <div class="card">
+        <div class="row">
+            <!-- Vehicle Details - Top Left -->
+            <div class="col-md-4">
+                <div class="card vehicle-details-card mb-3">
                     <div class="card-header">Vehicle Details</div>
                     <div class="card-body">
                         <p>Make: <span th:text="${carMake}"></span></p>
@@ -45,13 +35,43 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Center-Right Aligned Cards -->
+            <div class="col-md-8">
+                <div class="row justify-content-center">
+                    <!-- MOT Details -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card mot-tax-details-card">
+                            <div class="card-header">Vehicle MOT Date</div>
+                            <div class="card-body">
+                                <p>MOT Date: <span th:text="${motDate}"></span></p>
+                                <p>MOT Status: <span th:text="${motStatus}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Tax Due Details -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card mot-tax-details-card">
+                            <div class="card-header">Vehicle Tax Due Date</div>
+                            <div class="card-body">
+                                <p>Tax Due Date: <span th:text="${taxDate}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- Placeholder Message, Centered Below Cards -->
+        
+        <!-- Placeholder Message, Bottom Center -->
         <div class="row justify-content-center">
-            <div class="col-md-6 text-center mt-4">
+            <div class="col-md-12 text-center mt-4">
                 <p th:text="${placeholderMessage}" style="color:rgb(85, 0, 255); font-weight:bold;"></p>
             </div>
         </div>
     </div>
 </body>
+ <!-- Include Bootstrap's JavaScript and dependencies at the end of the body for better page load performance -->
+ <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+ <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </html>
