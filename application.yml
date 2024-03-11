@@ -2,6 +2,6 @@ spring:
   cloud:
     gcp:
       firestore:
-        project-id: your-project-id
+        project-id: motbookingreminder
         credentials:
           location: file:/Users/paulolphert/git_repo/MOTBOOKINGREMINDERAPPKEY/motbookingreminder-firebase-adminsdk-3yaxx-ef71a03334.json
