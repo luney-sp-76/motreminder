@@ -10,27 +10,29 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
-        html, body {
-            height: 100%;
-        }
-        body {
+        /* Adjustments for centering the main content without affecting the navbar */
+        .centered-content {
+            min-height: 100vh; /* Use min-height instead of height to ensure it covers the viewport, but can extend if content is longer */
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column; /* Stack items vertically */
         }
     </style>
 </head>
 <body>
-    <div th:replace=({navbar :: common-navbar})></div>
-    <div class="text-center">
+    <!-- Navbar goes here, outside the .centered-content div to not be affected by its styling -->
+    <div th:replace="~{navbar :: common-navbar}"></div>
+    
+    <!-- Main content wrapped in a div with class for centering -->
+    <div class="centered-content text-center">
         <h1>Welcome To MoT Booking Reminder</h1>
         <a href="/motcheck" class="btn btn-primary mt-4">Check your vehicle</a>
     </div>
+
     <!-- Include Bootstrap's JavaScript and dependencies at the end of the body for better page load performance -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-
-

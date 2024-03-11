@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div th:replace=({navbar :: common-navbar})></div>
+    <div th:replace="~{navbar :: common-navbar}"></div>
 
     <h1>Something went wrong with your service</h1>
     <a href="/motcheck">Go back to check your vehicle again</a>
