@@ -3,19 +3,55 @@
 <head>
     <title>Your Car Details</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Include Bootstrap JavaScript and its dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <h2>Vehicle MOT Date</h2>
-    <p>MOT Date: <span th:text="${motDate}"></span></p>
-    <p>MOT Status: <span th:text="${motStatus}"></span></p>
-    <h2>Vehicle Tax Due Date</h2>
-    <p>Tax Due Date: <span th:text="${taxDate}"></span></p>
-    <h2>Vehicle Details</h2>
-    <p>Make: <span th:text="${carMake}"></span></p>
-    <p>Colour: <span th:text="${carColour}"></span></p>
-    <p>Year: <span th:text="${carYear}"></span></p>
-    <p>Fuel: <span th:text="${carFuel}"></span></p>
-    <p>Engine Size: <span th:text="${carEngineSize}"></span></p>
-    <p th:text="${placeholderMessage}" style="color:rgb(85, 0, 255);"></p>
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <!-- Vehicle MOT Date Card -->
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Vehicle MOT Date</div>
+                    <div class="card-body">
+                        <p>MOT Date: <span th:text="${motDate}"></span></p>
+                        <p>MOT Status: <span th:text="${motStatus}"></span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Vehicle Tax Due Date Card -->
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Vehicle Tax Due Date</div>
+                    <div class="card-body">
+                        <p>Tax Due Date: <span th:text="${taxDate}"></span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Vehicle Details Card -->
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">Vehicle Details</div>
+                    <div class="card-body">
+                        <p>Make: <span th:text="${carMake}"></span></p>
+                        <p>Colour: <span th:text="${carColour}"></span></p>
+                        <p>Year: <span th:text="${carYear}"></span></p>
+                        <p>Fuel: <span th:text="${carFuel}"></span></p>
+                        <p>Engine Size: <span th:text="${carEngineSize}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Placeholder Message, Centered Below Cards -->
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center mt-4">
+                <p th:text="${placeholderMessage}" style="color:rgb(85, 0, 255); font-weight:bold;"></p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -3,14 +3,44 @@
 <head>
     <title>Vehicle Information</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Include Bootstrap JavaScript and its dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        /* Additional styles to center the content vertically */
+        html, body {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            align-items: center; /* Aligns vertically */
+            justify-content: center; /* Aligns horizontally */
+            padding-top: 40px;
+            padding-bottom: 40px;
+        }
+        .form-container {
+            width: 100%; /* You can adjust the width */
+            max-width: 330px; /* Sets a max-width for the form */
+            padding: 15px;
+            margin: auto;
+        }
+    </style>
 </head>
 <body>
-    <h2>Enter Vehicle Registration Number</h2>
-    <div th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></div>
-    <form action="/vehicles" method="post">
-        <label for="registrationNumber">Registration Number:</label>
-        <input type="text" id="registrationNumber" name="registrationNumber">
-        <button type="submit">Submit</button>
-    </form>
+    <div class="form-container text-center">
+        <h2>Enter Vehicle Registration Number</h2>
+        <div th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></div>
+        <form action="/vehicles" method="post" class="mt-3">
+            <div class="form-group">
+                <label for="registrationNumber" class="sr-only">Registration Number:</label>
+                <input type="text" id="registrationNumber" name="registrationNumber" class="form-control" placeholder="Registration Number" required autofocus>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+        </form>
+    </div>
 </body>
 </html>
+
