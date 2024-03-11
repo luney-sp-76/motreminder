@@ -21,17 +21,7 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">MoT Booking Reminder</a>
-        <div id="navbarNav" class="collapse navbar-collapse">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="userEmail"></a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-
+    <div th:replace="~{navbar :: common-navbar}"></div>
     <div class="form-container text-center">
         <div id="signInDiv">
             <h3>Sign In</h3>
