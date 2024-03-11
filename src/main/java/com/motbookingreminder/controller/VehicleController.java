@@ -46,12 +46,15 @@ public class VehicleController {
             LocalDate today = LocalDate.now();
             String placeholderMessage;
 
+            LocalDate reminderDate = null;
+
             if (car.getMotStatus().equals("Invalid")) {
                 placeholderMessage = "Book your MOT today";
             } else if (localMotExpiryDate.isBefore(today.plusMonths(3))) {
                 placeholderMessage = "Book your MOT today";
             } else if (localMotExpiryDate.isAfter(today.plusMonths(3))) {
                 placeholderMessage = "Set a Reminder";
+                reminderDate = localMotExpiryDate.minusMonths(3);
             } else {
                 placeholderMessage = "Check your MOT status"; // Default message or any other logic you'd like to
                                                               // implement
@@ -70,6 +73,10 @@ public class VehicleController {
             model.addAttribute("carColour", car.getColour());
             model.addAttribute("carEngineSize", car.getEngineCapacity());
             model.addAttribute("placeholderMessage", placeholderMessage);
+            // Only add reminderDate to the model if it's set
+            if (reminderDate != null) {
+                model.addAttribute("reminderDate", reminderDate);
+            }
 
             return "vehicleInfo"; // Name of the HTML file to display the MOT date
         } catch (CustomApplicationException ex) {

@@ -11,4 +11,14 @@ public class WebController {
         return "numberPlate";
     }
 
+    @GetMapping("/setreminder")
+    public String showReminderForm() {
+        return "setreminder";
+    }
+
+    @GetMapping("/login")
+    public String showLogin() {
+        return "login";
+    }
+
 }

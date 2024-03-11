@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Log In</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+    <script src="/path/to/firebase-init.js"></script>
+    <style>
+        .form-container {
+            max-width: 400px;
+            margin: auto;
+            padding-top: 50px;
+        }
+        .form-container div {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">MoT Booking Reminder</a>
+        <div id="navbarNav" class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="userEmail"></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="form-container text-center">
+        <div id="signInDiv">
+            <h3>Sign In</h3>
+            <input type="email" id="emailSignIn" class="form-control" placeholder="Email">
+            <input type="password" id="passwordSignIn" class="form-control" placeholder="Password">
+            <button class="btn btn-primary" onclick="signIn()">Sign In</button>
+        </div>
+        <div id="signUpDiv">
+            <h3>Sign Up</h3>
+            <input type="email" id="emailSignUp" class="form-control" placeholder="Email">
+            <input type="password" id="passwordSignUp" class="form-control" placeholder="Password">
+            <button class="btn btn-success" onclick="signUp()">Sign Up</button>
+        </div>
+    </div>
+
+    <!-- Firebase Auth State Change -->
+    <script>
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                document.getElementById('userEmail').textContent = user.email;
+                window.location.href = '/setreminders'; // Redirect to /setreminders if logged in
+            } else {
+                document.getElementById('userEmail').textContent = '';
+            }
+        });
+
+        function signUp() {
+            var email = document.getElementById("emailSignUp").value;
+            var password = document.getElementById("passwordSignUp").value;
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Sign up success
+                console.log("Signed up");
+            })
+            .catch((error) => {
+                console.error(error.message);
+                alert(error.message); // Display error message to the user
+            });
+        }
+
+        function signIn() {
+            var email = document.getElementById("emailSignIn").value;
+            var password = document.getElementById("passwordSignIn").value;
+            firebase.auth().signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Sign in success
+                console.log("Signed in");
+            })
+            .catch((error) => {
+                console.error(error.message);
+                alert(error.message); // Display error message to the user
+            });
+        }
+    </script>
+
+    <!-- Include Bootstrap JavaScript and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
