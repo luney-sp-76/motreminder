@@ -16,6 +16,7 @@ public class Car {
     private int revenueWeight;
     private Date taxDueDate;
     private String taxStatus;
+    private Date motExpiryDate;
     private String typeApproval;
     private String wheelplan;
     private int yearOfManufacture;
@@ -25,7 +26,8 @@ public class Car {
 
     public Car(Date artEndDate, int co2Emissions, String colour, int engineCapacity, String fuelType, String make,
             boolean markedForExport, String monthOfFirstRegistration, String motStatus, String registrationNumber,
-            int revenueWeight, Date taxDueDate, String taxStatus, String typeApproval, String wheelplan,
+            int revenueWeight, Date taxDueDate, String taxStatus, Date motExpiryDate, String typeApproval,
+            String wheelplan,
             int yearOfManufacture, String euroStatus, String realDrivingEmissions, Date dateOfLastV5CIssued) {
         this.artEndDate = artEndDate;
         this.co2Emissions = co2Emissions;
@@ -40,6 +42,7 @@ public class Car {
         this.revenueWeight = revenueWeight;
         this.taxDueDate = taxDueDate;
         this.taxStatus = taxStatus;
+        this.motExpiryDate = motExpiryDate;
         this.typeApproval = typeApproval;
         this.wheelplan = wheelplan;
         this.yearOfManufacture = yearOfManufacture;
@@ -123,6 +126,14 @@ public class Car {
         this.motStatus = motStatus;
     }
 
+    public Date getMotExpiryDate() {
+        return motExpiryDate;
+    }
+
+    public void setMotExpiryDate(Date motExpiryDate) {
+        this.motExpiryDate = motExpiryDate;
+    }
+
     public String getRegistrationNumber() {
         return registrationNumber;
     }
@@ -204,3 +215,23 @@ public class Car {
     }
 
 }
+
+// {
+// "registrationNumber": "SH10MLZ",
+// "taxStatus": "Taxed",
+// "taxDueDate": "2024-09-01",
+// "motStatus": "Valid",
+// "make": "HYUNDAI",
+// "yearOfManufacture": 2010,
+// "engineCapacity": 1998,
+// "co2Emissions": 177,
+// "fuelType": "PETROL",
+// "markedForExport": false,
+// "colour": "GREY",
+// "typeApproval": "M1",
+// "revenueWeight": 1455,
+// "dateOfLastV5CIssued": "2023-09-28",
+// "motExpiryDate": "2024-04-15",
+// "wheelplan": "2 AXLE RIGID BODY",
+// "monthOfFirstRegistration": "2010-05"
+// }
