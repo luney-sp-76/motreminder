@@ -64,6 +64,10 @@
         // Logic to prepopulate your calendar with storedDate
         // This might involve setting the value of a date input, for example
         document.getElementById("yourDateInputId").value = storedDate;
+      }else{
+        // Logic to prepopulate your calendar with today's date
+        // This might involve setting the value of a date input, for example
+        document.getElementById("yourDateInputId").value = new Date().toISOString().split('T')[0];
       }
     });
   </script>
