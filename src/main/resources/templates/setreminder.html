@@ -42,12 +42,10 @@
           </div>
     </div>
 </body>
- <!-- Firebase SDKs -->
- <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
- <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
- 
-<script type="module" src="/js/firebase-init.js"></script>
-<script src="/js/firebase-status.js"></script>
+<script type="module">
+  import { adjustLoginLogoutLink } from '/js/firebase-status.js'
+  adjustLoginLogoutLink()
+</script>
 <script th:inline="javascript">
     /*<![CDATA[*/
     var reminderDate = /*[[${reminderDate}]]*/ "defaultDate";

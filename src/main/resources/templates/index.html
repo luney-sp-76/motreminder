@@ -31,11 +31,11 @@
         <a href="/motcheck" class="btn btn-primary mt-4">Check your vehicle</a>
     </div>
     <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
 <script type="module" src="/js/firebase-init.js"></script>
-<script src="/js/firebase-status.js"></script>
+<script type="module">
+    import { adjustLoginLogoutLink } from '/js/firebase-status.js'
+    adjustLoginLogoutLink()
+  </script>
    
     <!-- Include Bootstrap's JavaScript and dependencies at the end of the body for better page load performance -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

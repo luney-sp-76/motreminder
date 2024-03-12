@@ -40,13 +40,11 @@
             </form>
         </div>
     </div>
-    <!-- Firebase SDKs -->
- 
- <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
- <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
- <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
  <script type="module" src="/js/firebase-init.js"></script>
- <script src="/js/firebase-status.js"></script>
+ <script type="module">
+    import { adjustLoginLogoutLink } from '/js/firebase-status.js'
+    adjustLoginLogoutLink()
+  </script>
     <!-- Include Bootstrap JavaScript and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
