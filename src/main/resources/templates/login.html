@@ -1,85 +1,150 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Log In</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <!-- Include Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-    <script type="module" src="/js/firebase-init.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
     <style>
-        .form-container {
-            max-width: 400px;
-            margin: auto;
-            padding-top: 50px;
-        }
-        .form-container div {
-            margin-bottom: 15px;
-        }
+      .form-container {
+        max-width: 400px;
+        margin: auto;
+        padding-top: 50px;
+      }
+      .form-container div {
+        margin-bottom: 15px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div th:replace="~{navbar :: common-navbar}"></div>
     <div class="form-container text-center">
-        <div id="signInDiv">
-            <h3>Sign In</h3>
-            <input type="email" id="emailSignIn" class="form-control" placeholder="Email">
-            <input type="password" id="passwordSignIn" class="form-control" placeholder="Password">
-            <button class="btn btn-primary" onclick="signIn()">Sign In</button>
-        </div>
-        <div id="signUpDiv">
-            <h3>Sign Up</h3>
-            <input type="email" id="emailSignUp" class="form-control" placeholder="Email">
-            <input type="password" id="passwordSignUp" class="form-control" placeholder="Password">
-            <button class="btn btn-success" onclick="signUp()">Sign Up</button>
-        </div>
-    </div>
+    <!-- Sign In Form -->
+    <form id="signInForm">
+        <h3>Sign In</h3>
+        <input type="email" id="emailSignIn" autocomplete="username"  class="form-control" placeholder="Email" required />
+        <input type="password" id="passwordSignIn" autocomplete="current-password"  class="form-control" placeholder="Password" required />
+        <button type="submit" class="btn btn-primary">Sign In</button>
+    </form>
+    
+    <!-- Sign Up Form -->
+    <form id="signUpForm">
+        <h3>Sign Up</h3>
+        <input type="email" id="emailSignUp" autocomplete="username" class="form-control" placeholder="Email" required />
+        <input type="password" id="passwordSignUp" autocomplete="current-password"  class="form-control" placeholder="Password" required />
+        <button type="submit" class="btn btn-success">Sign Up</button>
+    </form>
+</div>
+ <!-- Firebase SDKs -->
+ 
+ <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
+ <script type="module" src="/js/firebase-init.js"></script>
+ 
+
 
     <!-- Firebase Auth State Change -->
-    <script>
-        firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                document.getElementById('userEmail').textContent = user.email;
-                window.location.href = '/setreminders'; // Redirect to /setreminders if logged in
+    <script type="module">
+      import {app} from '/js/firebase-init.js';
+      import { auth } from '/js/firebase-init.js';
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+          document.getElementById("userEmail").textContent = user.email;
+          window.location.href = "/setreminders"; // Redirect to /setreminders if logged in
+        } else {
+          document.getElementById("userEmail").textContent = "";
+        }
+      });
+
+      function signUp() {
+        var email = document.getElementById("emailSignUp").value;
+        var password = document.getElementById("passwordSignUp").value;
+        firebase
+          .auth()
+          .createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Sign up success
+            console.log("Signed up");
+          })
+          .catch((error) => {
+            console.error(error.message);
+            alert(error.message); // Display error message to the user
+          });
+      }
+
+      function signIn() {
+        var email = document.getElementById("emailSignIn").value;
+        var password = document.getElementById("passwordSignIn").value;
+        firebase
+          .auth()
+          .signInWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Sign in success
+            console.log("Signed in");
+            // Redirect is handled by onAuthStateChanged listener
+          })
+          .catch((error) => {
+            console.error(error.message);
+            // Check if the error is because the user was not found
+            if (error.code === "auth/user-not-found") {
+              alert(
+                "No account exists with the provided email. Please sign up."
+              );
             } else {
-                document.getElementById('userEmail').textContent = '';
+              // Handle other errors, such as wrong password
+              alert(error.message);
             }
-        });
-
-        function signUp() {
-            var email = document.getElementById("emailSignUp").value;
-            var password = document.getElementById("passwordSignUp").value;
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                // Sign up success
-                console.log("Signed up");
-            })
-            .catch((error) => {
-                console.error(error.message);
-                alert(error.message); // Display error message to the user
-            });
-        }
-
-        function signIn() {
-            var email = document.getElementById("emailSignIn").value;
-            var password = document.getElementById("passwordSignIn").value;
-            firebase.auth().signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                // Sign in success
-                console.log("Signed in");
-            })
-            .catch((error) => {
-                console.error(error.message);
-                alert(error.message); // Display error message to the user
-            });
-        }
+          });
+      }
     </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Handle Sign In Form Submission
+      document.getElementById('signInForm').addEventListener('submit', function(event) {
+          event.preventDefault(); // Prevent default form submission behavior
+          const email = document.getElementById('emailSignIn').value;
+          const password = document.getElementById('passwordSignIn').value;
+          
+          // Use Firebase Auth for Sign In
+          firebase.auth().signInWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+              console.log("Signed in successfully.");
+              // Redirect the user or update UI
+          })
+          .catch((error) => {
+              console.error("Error signing in: ", error);
+              alert(error.message); // Show error to the user
+          });
+      });
+  
+      // Handle Sign Up Form Submission
+      document.getElementById('signUpForm').addEventListener('submit', function(event) {
+          event.preventDefault(); // Prevent default form submission behavior
+          const email = document.getElementById('emailSignUp').value;
+          const password = document.getElementById('passwordSignUp').value;
+          
+          // Use Firebase Auth for Sign Up
+          firebase.auth().createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+              console.log("Signed up successfully.");
+              // Redirect the user or update UI
+          })
+          .catch((error) => {
+              console.error("Error signing up: ", error);
+              alert(error.message); // Show error to the user
+          });
+      });
+  });
+  </script>
+  <script src="/js/firebase-status.js"></script>
 
     <!-- Include Bootstrap JavaScript and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+  </body>
 </html>

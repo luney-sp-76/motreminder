@@ -12,31 +12,16 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-    <script type="module" src="/js/firebase-init.js"></script>
-
-
-    <script>
-      function setReminder() {
-        firebase.auth().onAuthStateChanged(function (user) {
-          if (user) {
-            // User is signed in, redirect to the calendar page to set the reminder
-            window.location.href = "/setreminder";
-          } else {
-            // No user is signed in, redirect to the login page
-            window.location.href = "/login?redirect=set-reminder";
-          }
-        });
-      }
-    </script>
-
+  
     <style>
       .vehicle-details-card {
         background-color: #e3f2fd; /* Light blue background */
       }
       .mot-tax-details-card {
         background-color: #e8f5e9; /* Pale green background */
+      }
+      .green-link {
+        color: #28a745; /* Bootstrap's success green */
       }
     </style>
   </head>
@@ -101,11 +86,12 @@
                 >Book Now</a
               >
               <a
-                th:case="'Set a Reminder'"
                 href="javascript:void(0)"
-                onclick="setReminder()"
+                onclick="handleSetReminderClick()"
                 class="btn btn-success btn-lg"
+                id="setReminderButton"
                 >Set Reminder</a
+              >
               >
               <!-- Default action if none of the above messages match -->
               <a th:case="*" href="/index" class="btn btn-secondary btn-lg"
@@ -117,7 +103,29 @@
       </div>
     </div>
   </body>
+  <!-- Include Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.1/firebase-firestore.js"></script>
+  <script type="module" src="/js/firebase-init.js"></script>
 
+  <script type="module">
+    import {app} from '/js/firebase-init.js';
+    import { auth } from '/js/firebase-init.js';
+    // This function will be called when the "Set Reminder" button is clicked.
+    function handleSetReminderClick() {
+      firebase = auth;
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+          // User is signed in, redirect to /setreminder.
+          window.location.href = "/setreminder";
+        } else {
+          // No user is signed in, redirect to /login with a redirect parameter.
+          window.location.href = "/login?redirect=set-reminder";
+        }
+      });
+    }
+  </script>
+  <script src="/js/firebase-status.js"></script>
   <script th:inline="javascript">
     /*<![CDATA[*/
     var reminderDate = /*[[${reminderDate}]]*/ "defaultDate";

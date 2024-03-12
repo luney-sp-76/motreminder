@@ -5,6 +5,8 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+   
+   
     <style>
         .centered-container {
             display: flex;
@@ -19,6 +21,9 @@
             max-width: 330px;
             margin: auto;
         }
+        .green-link {
+        color: #28a745; /* Bootstrap's success green */
+      }
     </style>
 </head>
 <body>
@@ -37,6 +42,12 @@
           </div>
     </div>
 </body>
+ <!-- Firebase SDKs -->
+ <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+ 
+<script type="module" src="/js/firebase-init.js"></script>
+<script src="/js/firebase-status.js"></script>
 <script th:inline="javascript">
     /*<![CDATA[*/
     var reminderDate = /*[[${reminderDate}]]*/ "defaultDate";
