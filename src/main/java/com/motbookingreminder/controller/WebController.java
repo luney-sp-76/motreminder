@@ -17,8 +17,14 @@ public class WebController {
         return "login";
     }
 
-    @PostMapping("/setreminder")
-    public String setReminder() {
-        return "setreminder";
+    @GetMapping("/setreminder")
+    public String showReminderForm() {
+        return "setreminder"; // Displays the form
     }
+
+    @PostMapping("/setdate")
+    public String setDate() {
+        return "setdate"; // Displays the form
+    }
+
 }

@@ -28,20 +28,23 @@
 </head>
 <body>
     <div th:replace="~{navbar :: common-navbar}"></div>
-    <div class="centered-container">
+      <div class="centered-container">
         <div class="form-container">
             <h1 class="h3 mb-3 font-weight-normal">Set Reminder</h1>
-            <form id="reminderForm" action="/setreminder" method="post">
-                <div class="form-group  mb-3">
+            <form id="reminderForm" action="/setdate" method="post">
+          <div class="form-group  mb-3">
                     <label for="reminderDate">Date</label>
-                    <input type="date" id="yourDateInputId" name="reminderDate" class="form-control" required> 
-                </div>
-            <div class="form-group  
-                <button class="btn btn-lg btn-primary btn-block" type="submit">Set Reminder</button>
-            </form>
+                  <input type="date " id="yourDateInputId" name="reminderDate" class="form-control" required> 
           </div>
-    </div>
-</body>
+          <div class="form-group"> <!-- Ensure this div tag is properly opened and closed -->
+                  <label for="reminderDate">Date</label>
+                  <input type="date" id="yourDateInputId" name="reminderDate" class="form-control" required> 
+           </div> <!-- Close your div tag here -->
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Set Reminder</button>
+              </form>
+        </div>
+      </div>
+
 <script type="module">
   import { adjustLoginLogoutLink } from '/js/firebase-status.js'
   adjustLoginLogoutLink()
@@ -64,5 +67,6 @@
       }
     });
   </script>
+  </body>
 </html>
 ```
