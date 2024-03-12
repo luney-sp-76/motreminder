@@ -3,6 +3,8 @@ package com.motbookingreminder.controller;
 import org.springframework.web.bind.annotation.*;
 import com.google.gson.Gson;
 import com.motbookingreminder.model.Car;
+import com.utilities.CustomApplicationException;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,42 +26,62 @@ public class VehicleController {
 
     @PostMapping("/vehicles")
     public String getVehicleDetails(@RequestParam("registrationNumber") String registrationNumber, Model model) {
-        String jsonResponse = vehicleService.getVehicleDetails(registrationNumber);
-        Car car = new Gson().fromJson(jsonResponse, Car.class);
+        try {
+            String jsonResponse = vehicleService.getVehicleDetails(registrationNumber);
 
-        Date motExpiryDate = car.getMotExpiryDate(); // Assuming this returns a java.util.Date
-        LocalDate localMotExpiryDate = motExpiryDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
+            if (jsonResponse.equals(
+                    "Please check the registration number and try again. If the problem persists, contact support.")) {
+                model.addAttribute("errorMessage", jsonResponse);
+                return "numberPlate";
+            }
 
-        // convert and compare the date
-        LocalDate today = LocalDate.now();
-        String placeholderMessage;
+            Car car = new Gson().fromJson(jsonResponse, Car.class);
 
-        if (car.getMotStatus().equals("Invalid")) {
-            placeholderMessage = "Book your MOT today";
-        } else if (localMotExpiryDate.isBefore(today.plusMonths(3))) {
-            placeholderMessage = "Book your MOT today";
-        } else if (localMotExpiryDate.isAfter(today.plusMonths(3))) {
-            placeholderMessage = "Set a Reminder";
-        } else {
-            placeholderMessage = "Check your MOT status"; // Default message or any other logic you'd like to implement
+            Date motExpiryDate = car.getMotExpiryDate(); // Assuming this returns a java.util.Date
+            LocalDate localMotExpiryDate = motExpiryDate.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+
+            // convert and compare the date
+            LocalDate today = LocalDate.now();
+            String placeholderMessage;
+
+            LocalDate reminderDate = null;
+
+            if (car.getMotStatus().equals("Invalid")) {
+                placeholderMessage = "Book your MOT today";
+            } else if (localMotExpiryDate.isBefore(today.plusMonths(3))) {
+                placeholderMessage = "Book your MOT today";
+            } else if (localMotExpiryDate.isAfter(today.plusMonths(3))) {
+                placeholderMessage = "Set a Reminder";
+                reminderDate = localMotExpiryDate.minusMonths(3);
+            } else {
+                placeholderMessage = "Check your MOT status"; // Default message or any other logic you'd like to
+                                                              // implement
+            }
+
+            // Assuming Car class has a method getMotExpiryDate() that returns the MOT date
+            // as
+            // String
+            model.addAttribute("motDate", car.getMotExpiryDate());
+            model.addAttribute("motStatus", car.getMotStatus());
+            model.addAttribute("taxDate", car.getTaxDueDate());
+            model.addAttribute("carMake", car.getMake());
+            model.addAttribute("carClass", car.getClass());
+            model.addAttribute("carYear", car.getYearOfManufacture());
+            model.addAttribute("carFuel", car.getFuelType());
+            model.addAttribute("carColour", car.getColour());
+            model.addAttribute("carEngineSize", car.getEngineCapacity());
+            model.addAttribute("placeholderMessage", placeholderMessage);
+            // Only add reminderDate to the model if it's set
+            if (reminderDate != null) {
+                model.addAttribute("reminderDate", reminderDate);
+            }
+
+            return "vehicleInfo"; // Name of the HTML file to display the MOT date
+        } catch (CustomApplicationException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "numberPlate"; // show the form page again with the error message
         }
-
-        // Assuming Car class has a method getMotExpiryDate() that returns the MOT date
-        // as
-        // String
-        model.addAttribute("motDate", car.getMotExpiryDate());
-        model.addAttribute("motStatus", car.getMotStatus());
-        model.addAttribute("taxDate", car.getTaxDueDate());
-        model.addAttribute("carMake", car.getMake());
-        model.addAttribute("carClass", car.getClass());
-        model.addAttribute("carYear", car.getYearOfManufacture());
-        model.addAttribute("carFuel", car.getFuelType());
-        model.addAttribute("carColour", car.getColour());
-        model.addAttribute("carEngineSize", car.getEngineCapacity());
-        model.addAttribute("placeholderMessage", placeholderMessage);
-
-        return "vehicleInfo"; // Name of the HTML file to display the MOT date
     }
 }

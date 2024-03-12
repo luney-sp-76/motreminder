@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Log In</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <!-- Include Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .form-container {
+        max-width: 400px;
+        margin: auto;
+        padding-top: 50px;
+      }
+      .form-container div {
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div th:replace="~{navbar :: common-navbar}"></div>
+    <div class="form-container text-center">
+      <!-- Sign In Form -->
+      <form id="signInForm">
+        <h3>Sign In</h3>
+        <input
+          type="email"
+          id="emailSignIn"
+          autocomplete="username"
+          class="form-control"
+          placeholder="Email"
+          required
+        />
+        <input
+          type="password"
+          id="passwordSignIn"
+          autocomplete="current-password"
+          class="form-control"
+          placeholder="Password"
+          required
+        />
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="signUpForm">
+        <h3>Sign Up</h3>
+        <input
+          type="email"
+          id="emailSignUp"
+          autocomplete="username"
+          class="form-control"
+          placeholder="Email"
+          required
+        />
+        <input
+          type="password"
+          id="passwordSignUp"
+          autocomplete="current-password"
+          class="form-control"
+          placeholder="Password"
+          required
+        />
+        <button type="submit" class="btn btn-success">Sign Up</button>
+      </form>
+    </div>
+    <script type="module" src="/js/firebase-init.js"></script>
+    <!-- Firebase Auth State Change -->
+    <script type="module">
+      import { auth } from "/js/firebase-init.js";
+      import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      import { adjustLoginLogoutLink } from '/js/firebase-status.js';
+    
+      document.addEventListener("DOMContentLoaded", () => {
+        adjustLoginLogoutLink();
+    
+        document.getElementById("signInForm").addEventListener("submit", event => {
+          event.preventDefault();
+          const email = document.getElementById("emailSignIn").value;
+          const password = document.getElementById("passwordSignIn").value;
+          signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
+            console.log("Signed in successfully.");
+            window.location.href = '/setreminder';
+          }).catch((error) => {
+            console.error("Error signing in: ", error);
+            alert(error.message);
+          });
+        });
+    
+        document.getElementById("signUpForm").addEventListener("submit", event => {
+          event.preventDefault();
+          const email = document.getElementById("emailSignUp").value;
+          const password = document.getElementById("passwordSignUp").value;
+          createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
+            console.log("Signed up successfully.");
+            // Redirect or other UI update
+            window.location.href = '/setreminder';
+          }).catch((error) => {
+            console.error("Error signing up: ", error);
+            alert(error.message);
+          });
+        });  
+      });
+    </script>
+    
+        <!-- Include Bootstrap JavaScript and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
+```

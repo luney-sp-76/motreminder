@@ -1,0 +1,31 @@
+// firebase-status.js
+import { auth } from './firebase-init.js'; // Adjust path as necessary
+
+const adjustLoginLogoutLink = () => {
+  const loginLink = document.getElementById("loginLink");
+  if (!loginLink) return; // Exit if loginLink doesn't exist on the page
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      // User is signed in, adjust to "Log Out"
+      loginLink.textContent = "Log Out";
+      loginLink.classList.add("green-link"); // Add the green class for styling
+      loginLink.href = "javascript:void(0)";
+      loginLink.onclick = () => {
+        auth.signOut().then(() => {
+          window.location.href = "/";
+        }).catch(error => {
+          console.error("Sign Out Error", error);
+        });
+      };
+    } else {
+      // No user is signed in, adjust to "Log In"
+      loginLink.textContent = "Log In";
+      loginLink.classList.remove("green-link"); // Remove the green class if present
+      loginLink.href = "/login";
+      loginLink.onclick = null; // Remove any previously set onclick event
+    }
+  });
+};
+
+export { adjustLoginLogoutLink };
