@@ -8,70 +8,114 @@
    
    
     <style>
-        .centered-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh; /* Use 100vh to take full viewport height */
-            padding: 40px 0;
-        }
-        .form-container {
-            width: 100%;
-            max-width: 330px;
-            margin: auto;
-        }
-        .green-link {
-        color: #28a745; /* Bootstrap's success green */
+      .centered-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          padding: 40px 0;
       }
-    </style>
-    
+      .form-container {
+          width: 100%;
+          max-width: 330px;
+          margin: auto;
+      }
+      .green-link {
+          color: #28a745;
+      }
+      .info-text {
+          margin-top: 20px;
+          font-size: 0.9rem;
+      }
+  </style>
+  
 </head>
 <body>
-    <div th:replace="~{navbar :: common-navbar}"></div>
-      <div class="centered-container">
-        <div class="form-container">
-            <h1 class="h3 mb-3 font-weight-normal">Set Reminder</h1>
-            <form id="reminderForm" action="/setdate" method="post">
-          <div class="form-group  mb-3">
-                    <label for="reminderDate">Date</label>
-                  <input type="date " id="yourDateInputId" name="reminderDate" class="form-control" required> 
+  <div th:replace="~{navbar :: common-navbar}"></div>
+  <div class="centered-container">
+      <div class="form-container">
+          <h1 class="h3 mb-3 font-weight-normal">Set Reminder</h1>
+          <form id="reminderForm" action="/setdate" method="post">
+              <div class="form-group mb-3">
+                  <label for="earliestDate">Earliest Booking Date</label>
+                  <input type="date" id="earliestDate" name="earliestDate" class="form-control" required> 
+              </div>
+              <div class="form-group">
+                  <label for="customDate">Your Booking Date</label>
+                  <input type="date" id="customDate" name="customDate" class="form-control">
+              </div>
+              <button class="btn btn-lg btn-primary btn-block" type="button" id="setReminderBtn">Set Reminder</button>
+          </form>
+          <div class="info-text">
+              Note: If you don't select "Your Booking Date", the "Earliest Booking Date" will be automatically used when you set a reminder.
           </div>
-          <div class="form-group"> <!-- Ensure this div tag is properly opened and closed -->
-                  <label for="reminderDate">Date</label>
-                  <input type="date" id="yourDateInputId" name="reminderDate" class="form-control" required> 
-           </div> <!-- Close your div tag here -->
-                <button class="btn btn-lg btn-primary btn-block" type="submit">Set Reminder</button>
-              </form>
-        </div>
       </div>
+  </div>
 
 <script type="module">
   import { adjustLoginLogoutLink } from '/js/firebase-status.js'
   adjustLoginLogoutLink()
-</script>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    var reminderDate = /*[[${reminderDate}]]*/ "defaultDate";
-    if (reminderDate !== "defaultDate") {
-      localStorage.setItem("reminderDate", reminderDate.toString());
-    }
-    /*]]>*/
   </script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      var storedDate = localStorage.getItem("reminderDate");
-      if (storedDate) {
-        // Logic to prepopulate your calendar with storedDate
-        // This might involve setting the value of a date input, for example
-        document.getElementById("yourDateInputId").value = storedDate;
-      }else{
-        // Logic to prepopulate your calendar with today's date
-        // This might involve setting the value of a date input, for example
-        document.getElementById("yourDateInputId").value = new Date().toISOString().split('T')[0];
-      }
+        var storedDate = localStorage.getItem("reminderDate");
+        if (storedDate) {
+            document.getElementById("earliestDate").value = storedDate;
+        } else {
+            document.getElementById("earliestDate").value = new Date().toISOString().split('T')[0];
+        }
+
+        document.getElementById("setReminderBtn").addEventListener("click", function() {
+            var customDate = document.getElementById("customDate").value;
+            var earliestDate = document.getElementById("earliestDate").value;
+
+            if (!customDate) {
+                // If custom date is not set, use earliest date
+                customDate = earliestDate;
+            }
+       });
     });
-  </script>
+</script>
+  <script type="module">
+  import '/js/firebase-init.js'; // Ensure this script initializes Firebase and exports `db`
+  import { auth } from '/js/firebase-init.js';
+  import {db} from '/js/firebase-init.js';
+  import { getFirestore, doc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+// Assuming 'db' is your Firestore database instance and 'auth' is your Firebase Auth instance
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("setReminderBtn").addEventListener("click", async () => {
+      const user = auth.currentUser;
+      console.log(user.email);
+        if (user) {
+            const customDate = document.getElementById("customDate").value || document.getElementById("earliestDate").value;
+            
+            // Reference to the 'reminders' collection
+            const remindersCollectionRef = collection(db, "reminders");
+            
+            try {
+                await addDoc(remindersCollectionRef, {
+                    email: user.email, // User's email
+                    userID: user.uid, // Firebase Auth User ID
+                    reminderDate: customDate
+                });
+
+                console.log("Reminder set successfully.");
+                alert("Your reminder has been set.");
+                // Redirect or update UI as needed
+            } catch (error) {
+                console.error("Error setting reminder: ", error);
+                alert("Failed to set reminder.");
+            }
+        } else {
+            console.log("No user is signed in.");
+            alert("Please sign in to set a reminder.");
+            window.location.href = "/login?redirect=set-reminder";
+        }
+    });
+});   
+</script>
   </body>
 </html>
 ```
