@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Calendar</h1>
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div id="calendar">
+                <input type="date" id="yourCalendarInputId" name="reminderDate" class="form-control">
+                </div>
+            </div>
+        </div>
+    </div>
+<script type="module">
+import '/js/firebase-init.js';
+import { getFirestore, query, collection, where, getDocs } from '/js/firebase-init.js';
+import { getAuth, onAuthStateChanged } from '/js/firebase-init.js';
+
+document.addEventListener("DOMContentLoaded", function () {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const remindersRef = collection(db, "reminders");
+            const q = query(remindersRef, where("userID", "==", user.uid));
+
+            getDocs(q).then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    // Assuming you want to show the first reminder date you find
+                    const data = doc.data();
+                    if (data.reminderDate) {
+                        document.getElementById("yourCalendarInputId").value = data.reminderDate;
+                    }
+                });
+            }).catch((error) => {
+                console.error("Error fetching reminder:", error);
+            });
+        } else {
+            console.log("User is not signed in");
+        }
+    });
+});
+</script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@3.10.2/dist/fullcalendar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@3.10.2/dist/daygrid.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                plugins: ['dayGrid'],
+                defaultView: 'dayGridMonth',
+                events: [
+                    // Add your events here
+                ]
+            });
+            calendar.render();
+        });
+    </script>
+</body>
+</html>
