@@ -2,7 +2,6 @@ package com.motbookingreminder.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class WebController {
@@ -22,7 +21,7 @@ public class WebController {
         return "setreminder"; // Displays the form
     }
 
-    @PostMapping("/setdate")
+    @GetMapping("/setdate")
     public String setDate() {
         return "setdate"; // Displays the form
     }

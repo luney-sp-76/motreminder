@@ -77,45 +77,49 @@
        });
     });
 </script>
-  <script type="module">
-  import '/js/firebase-init.js'; // Ensure this script initializes Firebase and exports `db`
-  import { auth } from '/js/firebase-init.js';
-  import {db} from '/js/firebase-init.js';
-  import { getFirestore, doc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+<script type="module">
+import { auth, db } from '/js/firebase-init.js'; // Assumes `auth` and `db` are exported from this module
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// Assuming 'db' is your Firestore database instance and 'auth' is your Firebase Auth instance
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("setReminderBtn").addEventListener("click", async () => {
+  const setReminderBtn = document.getElementById("setReminderBtn");
+  if (setReminderBtn) {
+    setReminderBtn.addEventListener("click", async () => {
       const user = auth.currentUser;
-      console.log(user.email);
-        if (user) {
-            const customDate = document.getElementById("customDate").value || document.getElementById("earliestDate").value;
-            
-            // Reference to the 'reminders' collection
-            const remindersCollectionRef = collection(db, "reminders");
-            
-            try {
-                await addDoc(remindersCollectionRef, {
-                    email: user.email, // User's email
-                    userID: user.uid, // Firebase Auth User ID
-                    reminderDate: customDate
-                });
+      if (user) {
+          const customDate = document.getElementById("customDate").value || document.getElementById("earliestDate").value;
+          
+          // Directly target the document in the 'reminders' collection with the user's UID
+          const reminderRef = doc(db, "reminders", user.uid);
+          
+          try {
+              await setDoc(reminderRef, {
+                  email: user.email, // User's email
+                  userID: user.uid, // Firebase Auth User ID, redundant if using UID as doc ID
+                  reminderDate: customDate
+              }, { merge: true }); // Use merge true to not overwrite other fields accidentally
 
-                console.log("Reminder set successfully.");
-                alert("Your reminder has been set.");
-                // Redirect or update UI as needed
-            } catch (error) {
-                console.error("Error setting reminder: ", error);
-                alert("Failed to set reminder.");
-            }
-        } else {
-            console.log("No user is signed in.");
-            alert("Please sign in to set a reminder.");
-            window.location.href = "/login?redirect=set-reminder";
-        }
+              console.log("Reminder set successfully.");
+              alert("Your reminder has been set.");
+              // Redirect or update UI as needed
+              window.location.href = "/setdate";
+          } catch (error) {
+              console.error("Error setting reminder: ", error);
+              alert("Failed to set reminder.");
+          }
+      } else {
+          console.log("No user is signed in.");
+          alert("Please sign in to set a reminder.");
+          window.location.href = "/login?redirect=set-reminder";
+      }
     });
-});   
+  }
+});
 </script>
+<!-- Include Bootstrap JavaScript and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
 </html>
 ```
