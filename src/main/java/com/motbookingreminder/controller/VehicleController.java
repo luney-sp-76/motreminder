@@ -50,13 +50,15 @@ public class VehicleController {
 
             if (car.getMotStatus().equals("Invalid")) {
                 placeholderMessage = "Book your MOT today";
+                reminderDate = today;
             } else if (localMotExpiryDate.isBefore(today.plusMonths(3))) {
                 placeholderMessage = "Book your MOT today";
+                reminderDate = today;
             } else if (localMotExpiryDate.isAfter(today.plusMonths(3))) {
                 placeholderMessage = "Set a Reminder";
                 reminderDate = localMotExpiryDate.minusMonths(3);
             } else {
-                placeholderMessage = "Check your MOT status"; // Default message or any other logic you'd like to
+                placeholderMessage = "Check your MOT status"; // Default message or any other logic you'd like to //
                                                               // implement
             }
 
