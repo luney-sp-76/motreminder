@@ -85,6 +85,7 @@ public class VehicleController {
             model.addAttribute("carFuel", car.getFuelType());
             model.addAttribute("carColour", car.getColour());
             model.addAttribute("carEngineSize", car.getEngineCapacity());
+            model.addAttribute("registrationNumber", car.getRegistrationNumber());
             model.addAttribute("placeholderMessage", placeholderMessage);
             // Only add reminderDate to the model if it's set
             if (reminderDate != null) {
