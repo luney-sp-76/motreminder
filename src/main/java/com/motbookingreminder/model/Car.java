@@ -2,6 +2,10 @@ package com.motbookingreminder.model;
 
 import java.util.Date;
 
+/**
+ * Represents a car with various attributes such as registration number, make,
+ * model, etc.
+ */
 public class Car {
     private Date artEndDate;
     private int co2Emissions;
@@ -215,23 +219,3 @@ public class Car {
     }
 
 }
-
-// {
-// "registrationNumber": "SH10MLZ",
-// "taxStatus": "Taxed",
-// "taxDueDate": "2024-09-01",
-// "motStatus": "Valid",
-// "make": "HYUNDAI",
-// "yearOfManufacture": 2010,
-// "engineCapacity": 1998,
-// "co2Emissions": 177,
-// "fuelType": "PETROL",
-// "markedForExport": false,
-// "colour": "GREY",
-// "typeApproval": "M1",
-// "revenueWeight": 1455,
-// "dateOfLastV5CIssued": "2023-09-28",
-// "motExpiryDate": "2024-04-15",
-// "wheelplan": "2 AXLE RIGID BODY",
-// "monthOfFirstRegistration": "2010-05"
-// }
