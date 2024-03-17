@@ -163,7 +163,10 @@
     var reminderDate = /*[[${reminderDate}]]*/ 'defaultDate'
     if (reminderDate !== 'defaultDate') {
       localStorage.setItem('reminderDate', reminderDate.toString())
+      
     }
+    var motDate = /*[[${motDate}]]*/
+    localStorage.setItem('motDate', motDate.toString())
     /*]]>*/
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
