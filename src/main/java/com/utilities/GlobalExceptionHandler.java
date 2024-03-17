@@ -8,6 +8,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * This class is a global exception handler that handles various types of
+ * exceptions
+ * and provides appropriate error responses.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
