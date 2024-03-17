@@ -13,6 +13,20 @@
         padding-top: 50px;
       }
     </style>
+    <style>
+      .container {
+        padding-top: 50px;
+      }
+      @keyframes pulseAnimation {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+      .pulse {
+        animation: pulseAnimation 1s infinite;
+      }
+    </style>
+    
   </head>
   <body>
     <div th:replace="~{navbar :: common-navbar}"></div>
@@ -29,6 +43,7 @@
         </div>
       </div>
     </div>
+    
     <script type="module">
         import { adjustLoginLogoutLink } from '/js/firebase-status.js'
         adjustLoginLogoutLink()
@@ -55,15 +70,31 @@
             getDoc(reminderDocRef)
               .then((docSnap) => {
                 if (docSnap.exists() && docSnap.data().reminderDate) {
-                    const formattedDate = formatDateToDDMMYYYY(docSnap.data().reminderDate).replace(/\//g, '-');
-                    console.log(formattedDate); // Outputs: 15-03-2023
+                  const reminderDate = new Date(docSnap.data().reminderDate);
+                    const motExpiryDate = new Date(docSnap.data().motExpiryDate);
+                    const formattedReminderDate = formatDateToDDMMYYYY(reminderDate).replace(/\//g, '-');
+                    const formattedMotExpiryDate = formatDateToDDMMYYYY(motExpiryDate).replace(/\//g, '-');
 
-          document.getElementById("displayReminderDate").innerText = `Reminder Date: ${formattedDate}`;
-        } else {
+                    document.getElementById("displayReminderDate").innerText = `Reminder Date: ${formattedReminderDate}`;
+                    document.getElementById("registrationNumber").innerText = `Registration Number: ${docSnap.data().regNumber}`;
+                    document.getElementById("motExpiryDate").innerText = `MOT Expiry Date: ${formattedMotExpiryDate}`;
+
+                    // Compare dates to update UI
+                    if (reminderDate > motExpiryDate) {
+                        // Make the Change Date button pulse
+                        document.querySelector("a.btn").classList.add("pulse");
+
+                        // Add a note about the reminder and MOT expiry date issue
+                        const note = document.createElement("p");
+                        note.style.color = "red"; // Make the note stand out
+                        note.innerText = "Your reminder date cannot be after the MOT expiry date.";
+                        document.querySelector(".container").appendChild(note);
+                    }
+
+              } else {
           document.getElementById("displayReminderDate").innerText = "No reminder set.";
         }
-        document.getElementById("registrationNumber").innerText = `Registration Number: ${docSnap.data().regNumber}`;
-        document.getElementById("motExpiryDate").innerText = `MOT Expiry Date: ${formatDateToDDMMYYYY(docSnap.data().motExpiryDate).replace(/\//g, '-')}`;    
+            
       }).catch(error => {
         console.error("Error fetching reminder:", error);
         document.getElementById("displayReminderDate").innerText = "Error loading reminder.";
