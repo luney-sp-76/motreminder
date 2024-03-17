@@ -8,6 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.motbookingreminder.model.Greeting;
 
+/**
+ * Handles requests for the "/greeting" endpoint and returns a greeting message.
+ *
+ * @param name the name to include in the greeting message (default value is
+ *             "Paul" if not provided)
+ * @return a Greeting object containing the counter value and the formatted
+ *         greeting message
+ */
 @RestController
 public class GreetingController {
     private static final String template = "Hello, %s!";

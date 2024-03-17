@@ -16,6 +16,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.google.gson.Gson;
 
+/**
+ * This class represents a service for retrieving vehicle details using the DVLA
+ * API.
+ * It provides a method to get the vehicle details based on the registration
+ * number.
+ */
 @Service
 public class VehicleService {
 

@@ -12,6 +12,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
+/**
+ * The VehicleController class is responsible for handling HTTP requests related
+ * to vehicles.
+ * It interacts with the VehicleService to retrieve vehicle details and perform
+ * necessary operations.
+ */
 @Controller
 public class VehicleController {
 
