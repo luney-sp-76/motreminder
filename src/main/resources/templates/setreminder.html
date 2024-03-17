@@ -96,7 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
               await setDoc(reminderRef, {
                   email: user.email, // User's email
                   userID: user.uid, // Firebase Auth User ID, redundant if using UID as doc ID
-                  reminderDate: customDate
+                  reminderDate: customDate,
+                  motExpiryDate: localStorage.getItem('motDate'),
+                  regNumber: localStorage.getItem('regNumber')
               }, { merge: true }); // Use merge true to not overwrite other fields accidentally
 
               console.log("Reminder set successfully.");
