@@ -48,6 +48,11 @@ public class VehicleController {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
 
+            Date taxDueDate = car.getTaxDueDate(); // Assuming this returns a java.util.Date
+            LocalDate localTaxDueDate = taxDueDate.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+
             // convert and compare the date
             LocalDate today = LocalDate.now();
             String placeholderMessage;
@@ -71,9 +76,9 @@ public class VehicleController {
             // Assuming Car class has a method getMotExpiryDate() that returns the MOT date
             // as
             // String
-            model.addAttribute("motDate", car.getMotExpiryDate());
+            model.addAttribute("motDate", localMotExpiryDate);
             model.addAttribute("motStatus", car.getMotStatus());
-            model.addAttribute("taxDate", car.getTaxDueDate());
+            model.addAttribute("taxDate", localTaxDueDate);
             model.addAttribute("carMake", car.getMake());
             model.addAttribute("carClass", car.getClass());
             model.addAttribute("carYear", car.getYearOfManufacture());
