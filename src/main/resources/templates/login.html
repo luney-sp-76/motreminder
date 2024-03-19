@@ -42,6 +42,9 @@
           required
         />
         <button type="submit" class="btn btn-primary">Sign In</button>
+        <div>
+          <a href="#" id="resetPasswordLink">Forgot password?</a>
+        </div>
       </form>
 
       <!-- Sign Up Form -->
@@ -70,12 +73,13 @@
     <!-- Firebase Auth State Change -->
     <script type="module">
       import { auth } from "/js/firebase-init.js";
-      import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail  } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
       import { adjustLoginLogoutLink } from '/js/firebase-status.js';
     
       document.addEventListener("DOMContentLoaded", () => {
         adjustLoginLogoutLink();
-    
+        
+        // Sign in
         document.getElementById("signInForm").addEventListener("submit", event => {
           event.preventDefault();
           const email = document.getElementById("emailSignIn").value;
@@ -88,7 +92,8 @@
             alert(error.message);
           });
         });
-    
+
+        // Sign Up
         document.getElementById("signUpForm").addEventListener("submit", event => {
           event.preventDefault();
           const email = document.getElementById("emailSignUp").value;
@@ -101,8 +106,24 @@
             console.error("Error signing up: ", error);
             alert(error.message);
           });
-        });  
-      });
+        });
+
+        // Password Reset
+    document.getElementById("resetPasswordLink").addEventListener("click", event => {
+      event.preventDefault();
+      const email = document.getElementById("emailSignIn").value;
+      if(email) {
+        sendPasswordResetEmail(auth, email).then(() => {
+          alert("Password reset email sent!");
+        }).catch((error) => {
+          console.error("Error sending password reset email: ", error);
+          alert(error.message);
+        });
+      } else {
+        alert("Please enter your email address in the email field.");
+      }
+    });
+  });  
     </script>
     
         <!-- Include Bootstrap JavaScript and dependencies -->
