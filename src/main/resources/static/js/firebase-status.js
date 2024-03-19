@@ -4,6 +4,7 @@ import { auth } from './firebase-init.js'; // Adjust path as necessary
 const adjustLoginLogoutLink = () => {
   const loginLink = document.getElementById("loginLink");
   const setDateLink = document.getElementById("setdateLink"); // Get the "Reminder" link
+  const accountLink = document.getElementById("accountLink"); // Get the "Account" link
   if (!loginLink) return; // Exit if loginLink doesn't exist on the page
 
   auth.onAuthStateChanged(user => {
@@ -22,6 +23,9 @@ const adjustLoginLogoutLink = () => {
       if (setDateLink) {
         setDateLink.parentElement.style.display = ""; // Ensure the "Reminder" link is visible
       }
+      if (accountLink) {
+        accountLink.parentElement.style.display = "";  //  Ensure the  "Account" link is visible
+      }
     } else {
       // No user is signed in, adjust to "Log In"
       loginLink.textContent = "Log In";
@@ -30,6 +34,9 @@ const adjustLoginLogoutLink = () => {
       loginLink.onclick = null; // Remove any previously set onclick event
       if (setDateLink) {
         setDateLink.parentElement.style.display = "none"; // Hide the "Reminder" link
+      }
+      if (accountLink) {
+        accountLink.parentElement.style.display = "none"; // Hide the "Account" link
       }
     }
   });
