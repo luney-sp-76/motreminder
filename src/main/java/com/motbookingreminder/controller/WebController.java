@@ -32,4 +32,8 @@ public class WebController {
         return "setdate"; // Displays the form
     }
 
+    @GetMapping("/account")
+    public String showAccount() {
+        return "account"; // displays the account page
+    }
 }

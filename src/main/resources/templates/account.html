@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Profile</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Account Profile</h2>
+        <!-- Update Email Address -->
+        <div id="updateEmailSection">
+            <h4>Update Email Address</h4>
+            <input type="email" id="newEmail" placeholder="New Email">
+            <button id="updateEmailBtn">Update Email</button>
+        </div>
+
+        <!-- Update Password -->
+        <div id="updatePasswordSection">
+            <h4>Update Password</h4>
+            <input type="password" id="newPassword" placeholder="New Password">
+            <button id="updatePasswordBtn">Update Password</button>
+        </div>
+
+        <!-- Update Car Registration Number -->
+        <div id="updateCarRegSection">
+            <h4>Update Car Registration Number</h4>
+            <input type="text" id="newCarReg" placeholder="New Car Registration Number">
+            <button id="updateCarRegBtn">Update Car Registration</button>
+        </div>
+
+        <!-- Remove Reminder -->
+        <div id="removeReminderSection">
+            <h4>Remove Reminder</h4>
+            <button id="removeReminderBtn">Remove Reminder</button>
+        </div>
+
+        <!-- Close Account -->
+        <div id="closeAccountSection">
+            <h4>Close Account</h4>
+            <button id="closeAccountBtn" style="color: red;">Close Account</button>
+        </div>
+
+        <!-- Request Data Held -->
+        <div id="requestDataSection">
+            <h4>Request Data Held</h4>
+            <button id="requestDataBtn">Request Data</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="/path/to/your/js/firebase-init.js"></script>
+    <script src="/path/to/your/js/account-profile.js"></script> <!-- You'll create this -->
+</body>
+</html>
