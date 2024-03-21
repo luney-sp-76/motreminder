@@ -1,4 +1,4 @@
-package com.utilities;
+package com.motbookingreminder.utilities;
 
 /**
  * Represents an API error response.

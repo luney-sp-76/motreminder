@@ -1,4 +1,4 @@
-package com.utilities;
+package com.motbookingreminder.utilities;
 
 import org.springframework.http.HttpStatusCode;
 

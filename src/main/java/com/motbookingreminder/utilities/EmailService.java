@@ -1,4 +1,4 @@
-package com.utilities;
+package com.motbookingreminder.utilities;
 
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ses.SesClient;

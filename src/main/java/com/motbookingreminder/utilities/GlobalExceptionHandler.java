@@ -1,4 +1,4 @@
-package com.utilities;
+package com.motbookingreminder.utilities;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
