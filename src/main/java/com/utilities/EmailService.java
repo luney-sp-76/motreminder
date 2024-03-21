@@ -1,10 +1,14 @@
 package com.utilities;
 
 import org.springframework.stereotype.Service;
-import com.amazonaws.services.simpleemail.model.*;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
+import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ses.model.Body;
+import software.amazon.awssdk.services.ses.model.Content;
 import software.amazon.awssdk.services.ses.model.Destination;
+import software.amazon.awssdk.services.ses.model.Message;
+import software.amazon.awssdk.services.ses.model.SendEmailRequest;
+import software.amazon.awssdk.services.ses.model.SesException;
 
 @Service
 public class EmailService {
@@ -14,7 +18,7 @@ public class EmailService {
     public EmailService() {
         // Initialize SES client
         this.sesClient = SesClient.builder()
-                .region(Region.AWS_REGION) // Specify the AWS region, e.g., Region.US_EAST_1
+                .region(Region.EU_WEST_1) // Specify the AWS region, e.g., Region.US_EAST_1
                 .build();
     }
 
