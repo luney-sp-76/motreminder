@@ -21,7 +21,7 @@ public class ReminderCronJob {
     @Autowired
     private EmailService emailService;
 
-    @Scheduled(cron = "0 0 2 * * ?") // At 2:00 AM every day
+    @Scheduled(cron = "0 12 18 * * ?") // At 18:00 every day
     public void sendScheduledReminders() {
         Firestore db = FirestoreClient.getFirestore();
         LocalDate today = LocalDate.now();
@@ -40,7 +40,7 @@ public class ReminderCronJob {
                     String emailBody = String.format("This is a reminder that the MOT for %s expires on %s.", regNumber,
                             motExpiryDate);
                     // Send the email
-                    emailService.sendEmail("noreply@yourdomain.com", email, "MOT Expiry Reminder", emailBody);
+                    emailService.sendEmail("polphert@gmail.com", email, "MOT Expiry Reminder", emailBody);
                 }
             }
         } catch (InterruptedException | ExecutionException e) {

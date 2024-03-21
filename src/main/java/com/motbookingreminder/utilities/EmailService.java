@@ -18,7 +18,7 @@ public class EmailService {
     public EmailService() {
         // Initialize SES client
         this.sesClient = SesClient.builder()
-                .region(Region.EU_WEST_1) // Specify the AWS region, e.g., Region.US_EAST_1
+                .region(Region.EU_CENTRAL_1) // Specify the AWS region, e.g., Region.US_EAST_1
                 .build();
     }
 
