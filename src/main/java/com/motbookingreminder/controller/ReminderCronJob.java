@@ -25,7 +25,7 @@ public class ReminderCronJob {
     @Autowired
     private EmailService emailService;
 
-    @Scheduled(cron = "0 30 20 * * ?") // At 18:00 every day
+    @Scheduled(cron = "0 50 20 * * ?") // At 18:00 every day
     public void sendScheduledReminders() {
         Firestore db = FirestoreClient.getFirestore();
         LocalDate today = LocalDate.now();
