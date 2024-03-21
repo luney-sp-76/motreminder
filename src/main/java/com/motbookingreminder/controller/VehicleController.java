@@ -48,10 +48,16 @@ public class VehicleController {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
 
-            Date taxDueDate = car.getTaxDueDate(); // Assuming this returns a java.util.Date
-            LocalDate localTaxDueDate = taxDueDate.toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
+            Date taxDueDate = car.getTaxDueDate();
+            LocalDate localTaxDueDate = LocalDate.now(); // Assuming this returns a java.util.Date
+            if (taxDueDate == null) {
+                localTaxDueDate = null;
+
+            } else {
+                localTaxDueDate = taxDueDate.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+            }
 
             // convert and compare the date
             LocalDate today = LocalDate.now();
