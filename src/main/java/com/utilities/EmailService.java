@@ -1,8 +1,9 @@
 package com.utilities;
 
 import org.springframework.stereotype.Service;
+import com.amazonaws.services.simpleemail.model.*;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.Destination;
 
 @Service
