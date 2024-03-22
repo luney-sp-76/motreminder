@@ -10,20 +10,25 @@
     />
   </head>
   <body>
+    <div th:replace="~{navbar :: common-navbar}"></div>
     <div class="container mt-5">
       <h2>Account Profile</h2>
       <!-- Update Email Address -->
       <div id="updateEmailSection">
         <h4>Update Email Address</h4>
         <input type="email" id="newEmail" placeholder="New Email" />
-        <button id="updateEmailBtn">Update Email</button>
+      </div>
+      <div>
+        <button type="updateEmailBtn" id="updateEmailBtn" class="btn btn-primary btn-sm">Update Email</button>
       </div>
 
       <!-- Update Password -->
       <div id="updatePasswordSection">
         <h4>Update Password</h4>
         <input type="password" id="newPassword" placeholder="New Password" />
-        <button id="updatePasswordBtn">Update Password</button>
+      </div>
+      <div>
+        <button type="updatePasswordBtn" id="updatePasswordBtn" class="btn btn-primary btn-sm">Update Password</button>
       </div>
 
       <!-- Update Car Registration Number -->
@@ -32,27 +37,29 @@
         <input
           type="text"
           id="newCarReg"
-          placeholder="New Car Registration Number"
+          placeholder="New Registration Number"
         />
-        <button id="updateCarRegBtn">Update Car Registration</button>
+      </div>
+      <div>
+        <button type="updateCarRegBtn" id="updateCarRegBtn" class="btn btn-primary btn-sm">Update Car Registration</button>
       </div>
 
       <!-- Remove Reminder -->
       <div id="removeReminderSection">
         <h4>Remove Reminder</h4>
-        <button id="removeReminderBtn">Remove Reminder</button>
+        <button type="removeReminderBtn" id="removeReminderBtn" class="btn btn-primary btn-sm">Remove Reminder</button>
       </div>
 
       <!-- Close Account -->
       <div id="closeAccountSection">
         <h4>Close Account</h4>
-        <button id="closeAccountBtn" style="color: red">Close Account</button>
+        <button type="closeAccountBtn" id="closeAccountBtn" class="btn btn-danger btn-sm">Close Account</button>
       </div>
 
       <!-- Request Data Held -->
       <div id="requestDataSection">
         <h4>Request Data Held</h4>
-        <button id="requestDataBtn">Request Data</button>
+        <button type="requestDataBtn" id="requestDataBtn" class="btn btn-info btn-sm">Request Data</button>
       </div>
     </div>
     <script type="module">
