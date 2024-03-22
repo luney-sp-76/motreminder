@@ -6,20 +6,20 @@ import com.google.gson.Gson;
  * The GsonCar class is responsible for converting JSON strings to Car objects
  * using Gson library.
  */
-public class GsonCar {
+public class GsonVehicle {
     private final Gson gson;
 
-    public GsonCar() {
+    public GsonVehicle() {
         this.gson = new Gson();
     }
 
     /**
-     * Converts a JSON string to a Car object.
+     * Converts a JSON string to a Vehicle object.
      *
      * @param json the JSON string to be converted
-     * @return the Car object created from the JSON string
+     * @return the Vehicle object created from the JSON string
      */
-    public Car convertJsonToCar(String json) {
-        return gson.fromJson(json, Car.class);
+    public Vehicle convertJsonToVehicle(String json) {
+        return gson.fromJson(json, Vehicle.class);
     }
 }

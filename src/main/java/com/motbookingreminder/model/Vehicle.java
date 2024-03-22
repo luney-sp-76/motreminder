@@ -3,10 +3,11 @@ package com.motbookingreminder.model;
 import java.util.Date;
 
 /**
- * Represents a car with various attributes such as registration number, make,
+ * Represents a vehicle with various attributes such as registration number,
+ * make,
  * model, etc.
  */
-public class Car {
+public class Vehicle {
     private Date artEndDate;
     private int co2Emissions;
     private String colour;
@@ -28,7 +29,7 @@ public class Car {
     private String realDrivingEmissions;
     private Date dateOfLastV5CIssued;
 
-    public Car(Date artEndDate, int co2Emissions, String colour, int engineCapacity, String fuelType, String make,
+    public Vehicle(Date artEndDate, int co2Emissions, String colour, int engineCapacity, String fuelType, String make,
             boolean markedForExport, String monthOfFirstRegistration, String motStatus, String registrationNumber,
             int revenueWeight, Date taxDueDate, String taxStatus, Date motExpiryDate, String typeApproval,
             String wheelplan,
@@ -55,7 +56,7 @@ public class Car {
         this.dateOfLastV5CIssued = dateOfLastV5CIssued;
     }
 
-    public Car() {
+    public Vehicle() {
     }
 
     public Date getArtEndDate() {

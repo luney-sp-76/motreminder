@@ -10,11 +10,19 @@ import software.amazon.awssdk.services.ses.model.Message;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 import software.amazon.awssdk.services.ses.model.SesException;
 
+/**
+ * This class provides functionality to send emails using the Amazon Simple
+ * Email Service (SES).
+ */
 @Service
 public class EmailService {
 
     private final SesClient sesClient;
 
+    /**
+     * Constructs an instance of the EmailService class and initializes the SES
+     * client.
+     */
     public EmailService() {
         // Initialize SES client
         this.sesClient = SesClient.builder()
@@ -22,6 +30,14 @@ public class EmailService {
                 .build();
     }
 
+    /**
+     * Sends an email using the specified parameters.
+     *
+     * @param from    The email address of the sender.
+     * @param to      The email address of the recipient.
+     * @param subject The subject of the email.
+     * @param body    The body of the email.
+     */
     public void sendEmail(String from, String to, String subject, String body) {
         SendEmailRequest sendEmailRequest = SendEmailRequest.builder()
                 .source(from)

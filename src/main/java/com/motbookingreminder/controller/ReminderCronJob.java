@@ -16,6 +16,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * This class represents a cron job for sending scheduled reminders.
+ */
 @Service
 public class ReminderCronJob {
 
@@ -25,15 +28,19 @@ public class ReminderCronJob {
     @Autowired
     private EmailService emailService;
 
-    @Scheduled(cron = "0 0 2 * * ?") // At 02:00 every day
+    /**
+     * This method is scheduled to run at 02:00 every day and sends reminders for
+     * MOT expiry.
+     */
+    @Scheduled(cron = "0 0 2 * * ?")
     public void sendScheduledReminders() {
         Firestore db = FirestoreClient.getFirestore();
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        ApiFuture<QuerySnapshot> future = db.collection("reminders").get(); // Asynchronously retrieve all documents
+        ApiFuture<QuerySnapshot> future = db.collection("reminders").get();
         try {
-            List<QueryDocumentSnapshot> documents = future.get().getDocuments(); // Block on document retrieval
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
             for (QueryDocumentSnapshot document : documents) {
                 String reminderDate = document.getString("reminderDate");
                 if (reminderDate != null && LocalDate.parse(reminderDate, formatter).isEqual(today)) {

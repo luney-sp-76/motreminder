@@ -2,7 +2,7 @@ package com.motbookingreminder.controller;
 
 import org.springframework.web.bind.annotation.*;
 import com.google.gson.Gson;
-import com.motbookingreminder.model.Car;
+import com.motbookingreminder.model.Vehicle;
 import com.motbookingreminder.utilities.CustomApplicationException;
 
 import org.springframework.stereotype.Controller;
@@ -28,8 +28,6 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-    // Adjust the pattern to match your date format
-
     @PostMapping("/vehicles")
     public String getVehicleDetails(@RequestParam("registrationNumber") String registrationNumber, Model model) {
         try {
@@ -41,7 +39,7 @@ public class VehicleController {
                 return "numberPlate";
             }
 
-            Car car = new Gson().fromJson(jsonResponse, Car.class);
+            Vehicle car = new Gson().fromJson(jsonResponse, Vehicle.class);
 
             Date motExpiryDate = car.getMotExpiryDate(); // Assuming this returns a java.util.Date
             LocalDate localMotExpiryDate = motExpiryDate.toInstant()
