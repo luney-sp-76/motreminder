@@ -1,0 +1,27 @@
+body {
+    background-color: #f5f5f5;
+}
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+.form-section {
+    margin-bottom: 15px;
+}
+.form-section h4 {
+    margin-bottom: 10px;
+}
+.form-section input, .form-section button {
+    margin: 5px 0;
+}
+.btn-primary, .btn-danger, .btn-info {
+    width: 100%;
+}
+
+  
