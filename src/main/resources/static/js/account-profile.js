@@ -7,8 +7,10 @@ import {
     reauthenticateWithCredential,
     EmailAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { doc, updateDoc, deleteDoc, getFirestore, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+auth.onAuthStateChanged((user) => {
+    if (user) {
 const user = auth.currentUser;
 
 document.getElementById('updateEmailBtn').addEventListener('click', () => {
@@ -20,59 +22,70 @@ document.getElementById('updateEmailBtn').addEventListener('click', () => {
         updateDoc(userDocRef, {
             email: newEmail
         }).then(() => {
+            showAlert('Email updated successfully.', 'success');
             console.log("Firestore email updated successfully.");
         }).catch((error) => {
+            showAlert("Error updating email: ", error);
             console.error("Error updating email in Firestore: ", error);
         });
     }).catch((error) => {
+        showAlert("Error updating email: ", error);
         console.error("Error updating email: ", error);
     });
 });
 
-document.getElementById('updatePasswordBtn').addEventListener('click', () => {
-    const newPassword = document.getElementById('newPassword').value;
-    updatePassword(user, newPassword).then(() => {
-        console.log("Password updated successfully.");
-    }).catch((error) => {
-        console.error("Error updating password: ", error);
-    });
-});
+// document.getElementById('updatePasswordBtn').addEventListener('click', () => {
+//     const newPassword = document.getElementById('newPassword').value;
+//     updatePassword(user, newPassword).then(() => {
+//         showAlert('Password updated successfully.', 'success');
+//         console.log("Password updated successfully.");
+//     }).catch((error) => {
+//         showAlert("Error updating password: ", error);
+//         console.error("Error updating password: ", error);
+//     });
+// });
 
-document.getElementById('sendPasswordResetEmailBtn').addEventListener('click', () => {
-    const email = user.email;
-    sendPasswordResetEmail(auth, email).then(() => {
+document.getElementById('updatePasswordBtn').addEventListener('click', () => {
+   const email = user.email;
+     sendPasswordResetEmail(auth, email).then(() => {
+        showAlert('Password reset email sent successfully.', 'success');
         console.log("Password reset email sent successfully.");
     }).catch((error) => {
+        showAlert("Error sending password reset email: ", error);
         console.error("Error sending password reset email: ", error);
     });
-});
+ })
 
-document.getElementById('deleteAccountBtn').addEventListener('click', () => {   
+document.getElementById('closeAccountBtn').addEventListener('click', () => {   
     deleteUser(user).then(() => {
+        showAlert('Account deleted successfully.', 'success');
         console.log("Account deleted successfully.");
         // Delete user data from Firestore if you're storing it there too
     }).catch((error) => {
+        showAlert("Error deleting account: ", error);
         console.error("Error deleting account: ", error);
     });
 });
 
-document.getElementById('reauthenticateBtn').addEventListener('click', () => {
-    const credential = EmailAuthProvider.credential(user.email, document.getElementById('currentPassword').value);
-    reauthenticateWithCredential(user, credential).then(() => {
-        console.log("Reauthenticated successfully.");
-    }).catch((error) => {
-        console.error("Error reauthenticating: ", error);
-    });
-});
+// document.getElementById('reauthenticateBtn').addEventListener('click', () => {
+//     const credential = EmailAuthProvider.credential(user.email, document.getElementById('currentPassword').value);
+//     reauthenticateWithCredential(user, credential).then(() => {
+//         console.log("Reauthenticated successfully.");
+//     }).catch((error) => {
+//         console.error("Error reauthenticating: ", error);
+//     });
+// });
 
-document.getElementById('updateCarRegistrationBtn').addEventListener('click', () => {
-    const newCarRegistration = document.getElementById('newCarRegistration').value;
-    const userDocRef = doc(db, "users", user.uid);
+document.getElementById('updateCarRegBtn').addEventListener('click', () => {
+    const newCarRegistration = document.getElementById('newCarReg').value;
+    const userDocRef = doc(db, "reminders", user.uid);
     updateDoc(userDocRef, {
-        carRegistration: newCarRegistration
+        regNumber: newCarRegistration
     }).then(() => {
+        showAlert('Car registration updated successfully.', 'success');
         console.log("Car registration updated successfully.");
     }).catch((error) => {
+        showAlert("Error updating car registration: ", error);
         console.error("Error updating car registration: ", error);
     });
 });
@@ -80,13 +93,13 @@ document.getElementById('updateCarRegistrationBtn').addEventListener('click', ()
 document.getElementById('closeAccountBtn').addEventListener('click', () => {
     const userDocRef = doc(db, "users", user.uid);
     deleteDoc(userDocRef).then(() => {
+        showAlert('Account closed successfully.', 'success');
         console.log("Account closed successfully.");
     }).catch((error) => {
+        showAlert("Error closing account: ", error);
         console.error("Error closing account: ", error);
     });
 });
-
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 document.getElementById('requestDataBtn').addEventListener('click', () => { 
     const db = getFirestore();
@@ -98,9 +111,36 @@ document.getElementById('requestDataBtn').addEventListener('click', () => {
             console.log("User data:", docSnap.data());
             // Process and display or send the data to the user
         } else {
+            showAlert("No user data found.", "warning");
             console.log("No user data found.");
         }
     }).catch((error) => {
+        showAlert("Error fetching user data: ", error);
         console.error("Error fetching user data: ", error);
     });
 });
+    }
+    else {
+        console.log("No user is signed in.");
+    }
+});
+
+ // Call this function when a request is completed
+function showAlert(message, type) {
+    const alertPlaceholder = document.getElementById('alert-placeholder');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+      `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+      `   ${message}`,
+      '   <button type="button" class="close" data-dismiss="alert" aria-label="Close">',
+      '       <span aria-hidden="true">&times;</span>',
+      '   </button>',
+      '</div>'
+    ].join('')
+  
+    alertPlaceholder.append(wrapper);
+  }
+  
+  
+ 
+  
