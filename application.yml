@@ -1,7 +1,0 @@
-spring:
-  cloud:
-    gcp:
-      firestore:
-        project-id: motbookingreminder
-        credentials:
-          location: file:${HOME}/motbookingreminder/motbookingreminder-firebase-adminsdk-3yaxx-ef71a03334.json
