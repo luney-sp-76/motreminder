@@ -34,3 +34,5 @@ build/
 
 ### security ###
 /src/main/resources/application.properties
+/src/main/resources/keystore.p12
+
