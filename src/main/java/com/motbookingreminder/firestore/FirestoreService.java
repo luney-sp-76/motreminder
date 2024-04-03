@@ -18,7 +18,9 @@ public class FirestoreService {
     @PostConstruct
     public void initialize() {
         try {
-            String pathToServiceAccountKey = "/Users/paulolphert/git_repo/MOTBOOKINGREMINDERAPPKEY/motbookingreminder-firebase-adminsdk-3yaxx-ef71a03334.json";
+            String homePath = System.getenv("HOME");
+            String pathToServiceAccountKey = homePath
+                    + "/motbookingreminder/motbookingreminder-firebase-adminsdk-3yaxx-ef71a03334.json";
             FileInputStream serviceAccount = new FileInputStream(pathToServiceAccountKey);
 
             FirebaseOptions options = FirebaseOptions.builder()
