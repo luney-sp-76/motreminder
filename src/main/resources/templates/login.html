@@ -22,6 +22,7 @@
   <body>
     <div th:replace="~{navbar :: common-navbar}"></div>
     <div class="form-container text-center">
+      <div id="alert-placeholder"></div>
       <!-- Sign In Form -->
       <form id="signInForm">
         <h3>Sign In</h3>
@@ -73,60 +74,108 @@
     <!-- Firebase Auth State Change -->
     <script type="module">
       import { auth } from "/js/firebase-init.js";
-      import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail  } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-      import { adjustLoginLogoutLink } from '/js/firebase-status.js';
-    
+      import {
+        onAuthStateChanged,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        sendPasswordResetEmail,
+      } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+      import { adjustLoginLogoutLink } from "/js/firebase-status.js";
+
       document.addEventListener("DOMContentLoaded", () => {
         adjustLoginLogoutLink();
-        
+
         // Sign in
-        document.getElementById("signInForm").addEventListener("submit", event => {
-          event.preventDefault();
-          const email = document.getElementById("emailSignIn").value;
-          const password = document.getElementById("passwordSignIn").value;
-          signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
-            console.log("Signed in successfully.");
-            window.location.href = '/setreminder';
-          }).catch((error) => {
-            console.error("Error signing in: ", error);
-            alert(error.message);
+        document
+          .getElementById("signInForm")
+          .addEventListener("submit", (event) => {
+            event.preventDefault();
+            const email = document.getElementById("emailSignIn").value;
+            const password = document.getElementById("passwordSignIn").value;
+            signInWithEmailAndPassword(auth, email, password)
+              .then((userCredential) => {
+                console.log("Signed in successfully.");
+                window.location.href = "/setreminder";
+              })
+              .catch((error) => {
+                console.error("Error signing in: ", error);
+                if (error.code === "auth/user-not-found") {
+                  showAlert(
+                    "No account with this email exists. Please sign up."
+                  );
+                } else if (error.code === "auth/invalid-credential") {
+                  showAlert("Incorrect password. Please try again.");
+                } else {
+                  showAlert(error.message);
+                }
+
+              });
           });
-        });
 
         // Sign Up
-        document.getElementById("signUpForm").addEventListener("submit", event => {
-          event.preventDefault();
-          const email = document.getElementById("emailSignUp").value;
-          const password = document.getElementById("passwordSignUp").value;
-          createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
-            console.log("Signed up successfully.");
-            // Redirect or other UI update
-            window.location.href = '/setreminder';
-          }).catch((error) => {
-            console.error("Error signing up: ", error);
-            alert(error.message);
+        document
+          .getElementById("signUpForm")
+          .addEventListener("submit", (event) => {
+            event.preventDefault();
+            const email = document.getElementById("emailSignUp").value;
+            const password = document.getElementById("passwordSignUp").value;
+            createUserWithEmailAndPassword(auth, email, password)
+              .then((userCredential) => {
+                console.log("Signed up successfully.");
+                window.location.href = "/setreminder";
+              })
+              .catch((error) => {
+                console.error("Error signing up: ", error);
+                // Check for the "email-already-in-use" error and provide a more helpful message
+                if (error.code === "auth/email-already-in-use") {
+                  showAlert(
+                    "An account with this email already exists. Please sign in, or if you forgot your password, use the 'Forgot password?' link."
+                  );
+                } else {
+                  // For all other errors, just show the error message
+                  showAlert(error.message);
+                }
+              });
           });
-        });
 
         // Password Reset
-    document.getElementById("resetPasswordLink").addEventListener("click", event => {
-      event.preventDefault();
-      const email = document.getElementById("emailSignIn").value;
-      if(email) {
-        sendPasswordResetEmail(auth, email).then(() => {
-          alert("Password reset email sent!");
-        }).catch((error) => {
-          console.error("Error sending password reset email: ", error);
-          alert(error.message);
-        });
-      } else {
-        alert("Please enter your email address in the email field.");
+        document
+          .getElementById("resetPasswordLink")
+          .addEventListener("click", (event) => {
+            event.preventDefault();
+            const email = document.getElementById("emailSignIn").value;
+            if (email) {
+              sendPasswordResetEmail(auth, email)
+                .then(() => {
+                  showAlert("Password reset email sent!");
+                })
+                .catch((error) => {
+                  console.error("Error sending password reset email: ", error);
+                  showAlert(error.message);
+                });
+            } else {
+              showAlert("Please enter your email address in the email field.");
+            }
+          });
+      });
+
+      // Call this function when a request is completed
+      function showAlert(message, type) {
+        const alertPlaceholder = document.getElementById("alert-placeholder");
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = [
+          `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+          `   ${message}`,
+          '   <button type="button" class="close" data-dismiss="alert" aria-label="Close">',
+          '       <span aria-hidden="true">&times;</span>',
+          "   </button>",
+          "</div>",
+        ].join("");
+
+        alertPlaceholder.append(wrapper);
       }
-    });
-  });  
     </script>
-    
-        <!-- Include Bootstrap JavaScript and dependencies -->
+    <!-- Include Bootstrap JavaScript and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
