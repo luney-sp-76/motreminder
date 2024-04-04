@@ -48,8 +48,10 @@ public class ReminderCronJob {
                     String regNumber = document.getString("regNumber");
                     String motExpiryDate = document.getString("motExpiryDate");
                     // Construct the email body
-                    String emailBody = String.format("This is a reminder that the MOT for %s expires on %s.", regNumber,
-                            motExpiryDate);
+                    String emailBody = String.format(
+                            "This is a reminder that the MOT for %s expires on %s. Your reminder date is today %s.\n Please book your MoT at the nearest DVA Testing Centre.\n After your MoT why not come back and set a reminder for next time. Thank you for using MoT Booking Reminder.\n www.motbookingreminder.co.uk",
+                            regNumber,
+                            motExpiryDate, reminderDate);
                     // Send the email
                     emailService.sendEmail(senderMail, email, "MOT Expiry Reminder", emailBody);
                 }
