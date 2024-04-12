@@ -46,7 +46,6 @@ jobs:
         port: 22 # Optional if you use the standard SSH port
         script: |
           set -e  # Stop the script if any command fails
-          cd /home/paulolphert/motbookingreminder
+          cd /home/paulolphert/
           wget -v -O target/rest-service-0.0.2-SNAPSHOT.jar
-          #sudo systemctl restart myapp.service
 
