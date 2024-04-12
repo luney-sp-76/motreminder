@@ -35,7 +35,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: rest-service-jar
-        path: target/rest-service-0.0.1-SNAPSHOT.jar
+        path: target/rest-service-0.0.2-SNAPSHOT.jar
 
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v0.1.4
@@ -47,6 +47,6 @@ jobs:
         script: |
           set -e  # Stop the script if any command fails
           cd /home/paulolphert/motbookingreminder
-          wget -O target/rest-service-0.0.1-SNAPSHOT.jar
+          wget -O target/rest-service-0.0.2-SNAPSHOT.jar
           sudo systemctl restart myapp.service
 
