@@ -48,5 +48,5 @@ jobs:
           set -e  # Stop the script if any command fails
           cd /home/paulolphert/motbookingreminder
           wget -O target/rest-service-0.0.2-SNAPSHOT.jar
-          sudo systemctl restart myapp.service
+          #sudo systemctl restart myapp.service
 
