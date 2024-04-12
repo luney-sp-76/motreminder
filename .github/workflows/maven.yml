@@ -45,7 +45,8 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22 # Optional if you use the standard SSH port
         script: |
+          set -e  # Stop the script if any command fails
           cd /home/paulolphert/motbookingreminder
-          wget -O target/rest-service-0.0.1-SNAPSHOT.jar 
-          #sudo systemctl restart myapp.service
+          wget -O target/rest-service-0.0.1-SNAPSHOT.jar
+          sudo systemctl restart myapp.service
 
