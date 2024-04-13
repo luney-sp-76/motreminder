@@ -1,11 +1,3 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Java CI with Maven
 
 on:
@@ -16,9 +8,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -34,19 +24,24 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: rest-service-0.0.2-SNAPSHOT
+        name: rest-service-jar
         path: target/rest-service-0.0.2-SNAPSHOT.jar
 
-    - name: Get Artifact Download URL
-      id: get-url
+  download-and-deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get Artifact List
+      id: get-artifacts
       run: |
-        ARTIFACT_URL=$(curl -s -L \
+        ARTIFACTS_JSON=$(curl -s -L \
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ secrets.HUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${{ github.event.inputs.artifact_id }}" | jq -r '.archive_download_url')
-        echo "url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
-
+          "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
+        echo "$ARTIFACTS_JSON"
+        LATEST_ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].archive_download_url')
+        echo "url=$LATEST_ARTIFACT_URL" >> $GITHUB_OUTPUT
 
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v0.1.4
@@ -57,13 +52,8 @@ jobs:
         port: 22 # Optional if you use the standard SSH port
         script: |
           set -e  # Stop the script if any command fails
-          cd /home/paulolphert/
-          echo "Downloading from: $ARTIFACT_URL"
-          if [ -z "$ARTIFACT_URL" ]; then
-            echo "Error: ARTIFACT_URL is empty"
-            exit 1
-          fi
-          wget -vvv -O latest_artifact.zip "$ARTIFACT_URL" || { echo "Download failed"; exit 1; }
+          echo "Downloading artifact from: ${{ steps.get-artifacts.outputs.url }}"
+          wget -vvv -O latest_artifact.zip "${{ steps.get-artifacts.outputs.url }}" || { echo "Download failed"; exit 1; }
           ls -lh latest_artifact.zip
           file latest_artifact.zip
           if [ ! -s latest_artifact.zip ]; then
@@ -72,5 +62,3 @@ jobs:
           fi
           unzip -o latest_artifact.zip -d ./extracted || { echo "Failed to unzip"; exit 1; }
           echo "Deployment completed successfully."
-          
-        
