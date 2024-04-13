@@ -17,10 +17,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-        
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml -DskipTests
-    
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -31,17 +31,16 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - name: Get Artifact List
-      id: get-artifacts
+    - name: Get Most Recent Artifact Download URL
       run: |
         ARTIFACTS_JSON=$(curl -s -L \
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ secrets.HUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
-        echo "$ARTIFACTS_JSON"
-        LATEST_ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].archive_download_url')
-        echo "url=$LATEST_ARTIFACT_URL" >> $GITHUB_OUTPUT
+        echo "Artifact JSON: $ARTIFACTS_JSON"
+        LATEST_ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .archive_download_url')
+        echo "artifact_url=$LATEST_ARTIFACT_URL" >> $GITHUB_OUTPUT
 
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v0.1.4
@@ -49,16 +48,9 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 22 # Optional if you use the standard SSH port
+        port: 22
         script: |
-          set -e  # Stop the script if any command fails
-          echo "Downloading artifact from: ${{ steps.get-artifacts.outputs.url }}"
-          wget -vvv -O latest_artifact.zip "${{ steps.get-artifacts.outputs.url }}" || { echo "Download failed"; exit 1; }
-          ls -lh latest_artifact.zip
-          file latest_artifact.zip
-          if [ ! -s latest_artifact.zip ]; then
-            echo "Error: Downloaded file is empty"
-            exit 1
-          fi
-          unzip -o latest_artifact.zip -d ./extracted || { echo "Failed to unzip"; exit 1; }
+          echo "Downloading the most recent artifact from: ${{ steps.get-url.outputs.artifact_url }}"
+          wget -vvv -O latest_artifact.zip "${{ steps.get-url.outputs.artifact_url }}"
+          unzip -o latest_artifact.zip -d ./extracted
           echo "Deployment completed successfully."
