@@ -47,6 +47,6 @@ jobs:
         script: |
           set -e  # Stop the script if any command fails
           cd /home/paulolphert/
-          wget -vvv -O target/rest-service-0.0.2-SNAPSHOT.jar
+          wget -vvv -O target/rest-service-0.0.2-SNAPSHOT.jar "https://github.com/luney-sp-76/motreminder/actions/runs/8674283755/artifacts/*.jar"
           echo "all done"
 
