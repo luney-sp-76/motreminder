@@ -47,12 +47,19 @@ jobs:
         script: |
           set -e  # Stop the script if any command fails
           cd /home/paulolphert/
-          echo "Downloading ZIP file..."
-          wget -vvv -O latest_artifact.zip "$ARTIFACT_URL"
-          echo "Attempting to unzip latest_artifact.zip"
-          unzip -o -v latest_artifact.zip -d ./extracted || { echo "Failed to unzip"; exit 1; }
-          echo "Unzip successful, moving files..."
-          mv ./extracted/*.jar ./rest-service-0.0.2-SNAPSHOT.jar
+          echo "Downloading from: $ARTIFACT_URL"
+          if [ -z "$ARTIFACT_URL" ]; then
+            echo "Error: ARTIFACT_URL is empty"
+            exit 1
+          fi
+          wget -vvv -O latest_artifact.zip "$ARTIFACT_URL" || { echo "Download failed"; exit 1; }
+          ls -lh latest_artifact.zip
+          file latest_artifact.zip
+          if [ ! -s latest_artifact.zip ]; then
+            echo "Error: Downloaded file is empty"
+            exit 1
+          fi
+          unzip -o latest_artifact.zip -d ./extracted || { echo "Failed to unzip"; exit 1; }
           echo "Deployment completed successfully."
           
         
