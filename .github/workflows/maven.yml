@@ -48,4 +48,5 @@ jobs:
           set -e  # Stop the script if any command fails
           cd /home/paulolphert/
           wget -vvv -O target/rest-service-0.0.2-SNAPSHOT.jar
+          echo "all done"
 
