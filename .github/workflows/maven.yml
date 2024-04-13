@@ -34,7 +34,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: rest-service-jar
+        name: rest-service-0.0.2-SNAPSHOT
         path: target/rest-service-0.0.2-SNAPSHOT.jar
 
     - name: Deploy to VPS
