@@ -45,8 +45,11 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22 # Optional if you use the standard SSH port
         script: |
-          set -e  # Stop the script if any command fails
+          set -e
           cd /home/paulolphert/
-          wget -vvv -O target/rest-service-0.0.2-SNAPSHOT.jar "https://github.com/luney-sp-76/motreminder/actions/runs/8674283755/artifacts/*.jar"
+          ARTIFACT_URL=$(curl -s -H "Authorization: token ${{ secrets.HUB_TOKEN }}" \
+          "https://api.github.com/repos/luney-sp-76/motreminder/actions/artifacts" | \
+          jq -r '.artifacts[0].archive_download_url')
+          wget -vvv -O target/rest-service-0.0.2-SNAPSHOT.jar "$ARTIFACT_URL"
           echo "all done"
 
