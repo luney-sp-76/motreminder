@@ -50,6 +50,6 @@ jobs:
           ARTIFACT_URL=$(curl -s -H "Authorization: token ${{ secrets.HUB_TOKEN }}" \
           "https://api.github.com/repos/luney-sp-76/motreminder/actions/artifacts" | \
           jq -r '.artifacts[0].archive_download_url')
-          wget -vvv -O target/rest-service-0.0.2-SNAPSHOT.jar "$ARTIFACT_URL"
+          wget -vvv -O target/rest-service-0.0.2-SNAPSHOT.* "$ARTIFACT_URL"
           echo "all done"
 
