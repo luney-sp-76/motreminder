@@ -37,7 +37,7 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ secrets.HUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
+          "https://api.github.com/repos/luney-sp-76/motreminder/actions/artifacts")
         echo "Artifact JSON: $ARTIFACTS_JSON"
         LATEST_ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .archive_download_url')
         echo "artifact_url=$LATEST_ARTIFACT_URL" >> $GITHUB_OUTPUT
