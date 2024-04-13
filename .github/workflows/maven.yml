@@ -45,11 +45,14 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22 # Optional if you use the standard SSH port
         script: |
-          set -e
+          set -e  # Stop the script if any command fails
           cd /home/paulolphert/
-          ARTIFACT_URL=$(curl -s -H "Authorization: token ${{ secrets.HUB_TOKEN }}" \
-          "https://api.github.com/repos/luney-sp-76/motreminder/actions/artifacts" | \
-          jq -r '.artifacts[0].archive_download_url')
-          wget -vvv -O target/rest-service-0.0.2-SNAPSHOT.* "$ARTIFACT_URL"
-          echo "all done"
-
+          # Assuming ARTIFACT_URL is the URL to a zip file
+          wget -vvv -O latest_artifact.zip "$ARTIFACT_URL"
+          unzip latest_artifact.zip -d ./extracted
+          # Move the jar file to the target directory, adjust the pattern as necessary
+          mv ./extracted/*.jar ./target/rest-service-0.0.2-SNAPSHOT.jar
+          echo "Deployment completed successfully."
+          rm -f latest_artifact.zip
+          rm -rf ./extracted
+    
