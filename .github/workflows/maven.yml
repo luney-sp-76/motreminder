@@ -49,13 +49,10 @@ jobs:
           cd /home/paulolphert/
           echo "Downloading ZIP file..."
           wget -vvv -O latest_artifact.zip "$ARTIFACT_URL"
-          echo "Checking the contents of the directory..."
-          ls -alh  # List all files to confirm the ZIP file is downloaded
           echo "Attempting to unzip latest_artifact.zip"
           unzip -o -v latest_artifact.zip -d ./extracted || { echo "Failed to unzip"; exit 1; }
           echo "Unzip successful, moving files..."
           mv ./extracted/*.jar ./rest-service-0.0.2-SNAPSHOT.jar
           echo "Deployment completed successfully."
-          rm -f latest_artifact.zip
-          rm -rf ./extracted
+          
         
