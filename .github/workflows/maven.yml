@@ -82,7 +82,7 @@ jobs:
           max_attempts=5
           attempt=1
           while [ $attempt -le $max_attempts ]; do
-            STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://motbookingreminder.co.uk/healthcheck)
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://motbookingreminder.co.uk)
             if [ "$STATUS" -eq 200 ]; then
               echo "Health check successful."
               break
