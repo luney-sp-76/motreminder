@@ -73,7 +73,7 @@ jobs:
           export SERVICE_PORT=8081
           envsubst '$SERVICE_PORT' < /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
           sudo nginx -s reload
-          STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://motbookingreminder.co.uk/healthcheck)
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://motbookingreminder.co.uk/)
           if [ "$STATUS" -ne 200 ]; then
             echo "Health check failed for Green environment; status code: $STATUS"
             export SERVICE_PORT=8082
