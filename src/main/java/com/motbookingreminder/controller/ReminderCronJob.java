@@ -10,6 +10,7 @@ import com.motbookingreminder.utilities.EmailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * This class represents a cron job for sending scheduled reminders.
  */
+@Component
 @Service
 public class ReminderCronJob {
 
