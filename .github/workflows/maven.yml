@@ -70,9 +70,7 @@ jobs:
           rm -rf ./extracted
           echo "Deployment completed successfully."
          
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
+  
     - name: Start Green Service
       run: |
         ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.HOST }} 'sudo systemctl start motbookingreminder2.service'
