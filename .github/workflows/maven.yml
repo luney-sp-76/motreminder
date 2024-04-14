@@ -73,11 +73,11 @@ jobs:
   
     - name: Start Green Service
       run: |
-        ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.HOST }} 'sudo systemctl start motbookingreminder2.service'
+        ssh -tt ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'sudo systemctl start motbookingreminder2.service'
 
     - name: Update Nginx Configuration for Blue-Green Deployment
       run: |
-        ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.HOST }} '
+        ssh -tt ${{ secrets.USERNAME }}@${{ secrets.HOST }} '
         export SERVICE_PORT=8081  # Set to 8081 for green deployment
         envsubst '$SERVICE_PORT' < /path/to/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
         sudo nginx -s reload'
