@@ -32,15 +32,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Get Most Recent Artifact ID
+      id: fetch-artifact-id
       run: |
-        ARTIFACT_ID_JSON=$(curl -s -L \
+        ARTIFACTS_JSON=$(curl -s -L \
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ secrets.HUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
-        ARTIFACT_ID=$(echo "$ARTIFACT_ID_JSON" | jq -r '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .id')
+        ARTIFACT_ID=$(echo "$ARTIFACTS_JSON" | jq -r '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .id')
         echo "artifact_id=$ARTIFACT_ID" >> $GITHUB_ENV
-
+        echo "::set-output name=artifact_id::$ARTIFACT_ID"
 
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v0.1.4
@@ -50,25 +51,16 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          echo "Downloading the most recent artifact from: ${{ steps.get-artifacts.outputs.url }}"
-          wget -vvv -O latest_artifact.zip "${{ steps.get-artifacts.outputs.url }}" || { echo "Download failed"; exit 1; }
-          unzip -o latest_artifact.zip -d ./extracted
-          echo "Deployment completed successfully."
-
-    - name: Deploy to VPS
-      uses: appleboy/ssh-action@v0.1.4
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 22
-        script: 
-          if [[ -z "$ARTIFACT_ID" ]]; then
-        echo "Error: No valid artifact ID found."
+          if [[ -z "${{ steps.fetch-artifact-id.outputs.artifact_id }}" ]]; then
+            echo "Error: No valid artifact ID found."
             exit 1
-          fi"
-            ARTIFACT_URL="https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID/zip"
-        echo "Downloading artifact from: $ARTIFACT_URL"
-        wget -vvv -O latest_artifact.zip --header="Authorization: Bearer ${{ secrets.HUB_TOKEN }}" "$ARTIFACT_URL"
+          fi
+          ARTIFACT_URL="https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${{ steps.fetch-artifact-id.outputs.artifact_id }}/zip"
+          echo "Downloading artifact from: $ARTIFACT_URL"
+          curl -L -o latest_artifact.zip \
+            -H "Authorization: Bearer ${{ secrets.HUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$ARTIFACT_URL"
           unzip -o latest_artifact.zip -d ./extracted
           echo "Deployment completed successfully."
