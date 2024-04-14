@@ -63,38 +63,20 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "$ARTIFACT_URL"
           unzip -o latest_artifact.zip -d ./extracted
-          echo "Moving extracted files to the deployment directory..."
           sudo mv ./extracted/* /home/paulolphert/motbookingreminder/
-          echo "Cleaning up temporary files..."
           rm -f latest_artifact.zip
           rm -rf ./extracted
           echo "Deployment completed successfully."
-         
-  
-    - name: Start Green Service
-      run: |
-        ssh -tt ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'sudo systemctl start motbookingreminder2.service'
-
-    - name: Update Nginx Configuration for Blue-Green Deployment
-      run: |
-        ssh -tt ${{ secrets.USERNAME }}@${{ secrets.HOST }} '
-        export SERVICE_PORT=8081  # Set to 8081 for green deployment
-        envsubst '$SERVICE_PORT' < /path/to/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
-        sudo nginx -s reload'
-
-    - name: Health Check Green Service
-      run: |
-        STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://motbookingreminder.co.uk/healthcheck)
-        if [ "$STATUS" -ne 200 ]; then
-          echo "Health check failed for Green environment; status code: $STATUS"
-          ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.HOST }} '
-          export SERVICE_PORT=8082  # Revert to 8082 for blue deployment
-          envsubst '$SERVICE_PORT' < /path/to/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
-          sudo nginx -s reload'
-          exit 1
-        fi
-
-    - name: Confirm Deployment
-      run: |
-        echo "Green deployment successful and verified!"
-
+          sudo systemctl start motbookingreminder2.service
+          export SERVICE_PORT=8081
+          envsubst '$SERVICE_PORT' < /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
+          sudo nginx -s reload
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://motbookingreminder.co.uk/healthcheck)
+          if [ "$STATUS" -ne 200 ]; then
+            echo "Health check failed for Green environment; status code: $STATUS"
+            export SERVICE_PORT=8082
+            envsubst '$SERVICE_PORT' < /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
+            sudo nginx -s reload
+            exit 1
+          fi
+          echo "Green deployment successful and verified!"
