@@ -70,11 +70,13 @@ jobs:
           echo "Starting Green Service..."
           sudo systemctl daemon-reload
           sudo systemctl start motbookingreminder2.service
+          sleep 5
           
           echo "Updating Nginx Configuration..."
           export SERVICE_PORT=8081  # Set to 8081 for green deployment
           envsubst '$SERVICE_PORT' < /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
           sudo nginx -s reload
+          sleep 10
 
           echo "Performing Health Check..."
           max_attempts=5
