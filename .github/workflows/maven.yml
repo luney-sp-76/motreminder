@@ -67,8 +67,6 @@ jobs:
           rm -f latest_artifact.zip
           rm -rf ./extracted
           echo "Deployment completed successfully."
-          
-          |
           echo "Starting Green Service..."
           sudo systemctl daemon-reload
           sudo systemctl start motbookingreminder2.service
