@@ -75,7 +75,7 @@ jobs:
           
           echo "Updating Nginx Configuration..."
           export SERVICE_PORT=8081  # Set to 8081 for green deployment
-          envsubst '$SERVICE_PORT' < /path/to/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
+          envsubst '$SERVICE_PORT' < /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
           sudo nginx -s reload
 
           echo "Performing Health Check..."
@@ -91,7 +91,7 @@ jobs:
               if [ $attempt -eq $max_attempts ]; then
                 echo "Health check failed after $max_attempts attempts. Reverting to Blue environment..."
                 export SERVICE_PORT=8082  # Revert to 8082 for blue deployment
-                envsubst '$SERVICE_PORT' < /path/to/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
+                envsubst '$SERVICE_PORT' <  /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
                 sudo nginx -s reload
                 exit 1
               fi
