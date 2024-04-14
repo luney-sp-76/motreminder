@@ -63,4 +63,9 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "$ARTIFACT_URL"
           unzip -o latest_artifact.zip -d ./extracted
+          echo "Moving extracted files to the deployment directory..."
+          mv ./extracted/* /home/paulolphert/motbookingreminder/
+          echo "Cleaning up temporary files..."
+          rm -f latest_artifact.zip
+          rm -rf ./extracted
           echo "Deployment completed successfully."
