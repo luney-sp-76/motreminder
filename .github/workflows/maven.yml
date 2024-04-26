@@ -41,7 +41,7 @@ jobs:
           "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
         ARTIFACT_ID=$(echo "$ARTIFACTS_JSON" | jq -r '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .id')
         echo "artifact_id=$ARTIFACT_ID" >> $GITHUB_ENV
-        echo "::set-output name=artifact_id::$ARTIFACT_ID"
+        echo "artifact_id=$ARTIFACT_ID" >> $GITHUB_OUTPUT
 
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v0.1.4
