@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import com.google.gson.Gson;
 import com.motbookingreminder.model.Vehicle;
 import com.motbookingreminder.utilities.CustomApplicationException;
-
+import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +41,18 @@ public class VehicleController {
 
             Vehicle car = new Gson().fromJson(jsonResponse, Vehicle.class);
 
-            Date motExpiryDate = car.getMotExpiryDate(); // Assuming this returns a java.util.Date
-            LocalDate localMotExpiryDate = motExpiryDate.toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
+            // Assuming this returns a java.util.Date
+            Date motExpiryDate = car.getMotExpiryDate();
+            LocalDate localMotExpiryDate = LocalDate.now();
+
+            if (motExpiryDate == null) {
+                model.addAttribute("motErrorMessage", "There is no MOT date available for this vehicle");
+            } else {
+                localMotExpiryDate = motExpiryDate.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+                model.addAttribute("motDate", localMotExpiryDate);
+            }
 
             Date taxDueDate = car.getTaxDueDate();
             LocalDate localTaxDueDate = LocalDate.now(); // Assuming this returns a java.util.Date
@@ -55,6 +63,10 @@ public class VehicleController {
                 localTaxDueDate = taxDueDate.toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
+                // format the date
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy");
+                String formattedDate = localTaxDueDate.format(formatter);
+                model.addAttribute("taxDate", formattedDate);
             }
 
             // convert and compare the date
@@ -73,16 +85,23 @@ public class VehicleController {
                 placeholderMessage = "Set a Reminder";
                 reminderDate = localMotExpiryDate.minusMonths(3);
             } else {
-                placeholderMessage = "Check your MOT status"; // Default message or any other logic you'd like to //
-                                                              // implement
+                placeholderMessage = "Check your MOT status";
+            }
+
+            if (motExpiryDate == null) {
+                model.addAttribute("motDate", "No MOT date available");
+            } else {
+                // Use DateTimeFormatter to format the date
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy");
+                String formattedDate = localMotExpiryDate.format(formatter);
+                model.addAttribute("motDate", formattedDate);
             }
 
             // Assuming Car class has a method getMotExpiryDate() that returns the MOT date
             // as
             // String
-            model.addAttribute("motDate", localMotExpiryDate);
+            // model.addAttribute("motDate", localMotExpiryDate);
             model.addAttribute("motStatus", car.getMotStatus());
-            model.addAttribute("taxDate", localTaxDueDate);
             model.addAttribute("carMake", car.getMake());
             model.addAttribute("carClass", car.getClass());
             model.addAttribute("carYear", car.getYearOfManufacture());
