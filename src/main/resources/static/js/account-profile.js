@@ -72,11 +72,19 @@ document.getElementById('closeAccountBtn').addEventListener('click', () => {
 });
 
 
+// function isValidUKRegPlate(regPlate) {
+//     // Regex to check various styles of UK plates
+//     const regex = /^([A-Z]{2}\d{2} [A-Z]{3}|[A-Z]\d{1,3} [A-Z]{3}|[A-Z]{3} \d{1,3}[A-Z]|[A-Z]{1,3} \d{1,4}|[1-9]\d{0,3} [A-Z]{1,3}|[A-Z]{1,3} [1-9]\d{0,3})$/;
+//     return regex.test(regPlate.toUpperCase());
+// }
+
+//Reg Number check will check valid plates with or without spaces
 function isValidUKRegPlate(regPlate) {
-    // Regex to check various styles of UK plates
-    const regex = /^([A-Z]{2}\d{2} [A-Z]{3}|[A-Z]\d{1,3} [A-Z]{3}|[A-Z]{3} \d{1,3}[A-Z]|[A-Z]{1,3} \d{1,4}|[1-9]\d{0,3} [A-Z]{1,3}|[A-Z]{1,3} [1-9]\d{0,3})$/;
+    // Regex to check various styles of UK plates, making spaces optional
+    const regex = /^([A-Z]{2}\d{2}\s?[A-Z]{3}|[A-Z]\d{1,3}\s?[A-Z]{3}|[A-Z]{3}\s?\d{1,3}[A-Z]|[A-Z]{1,3}\s?\d{1,4}|[1-9]\d{0,3}\s?[A-Z]{1,3}|[A-Z]{1,3}\s?[1-9]\d{0,3})$/;
     return regex.test(regPlate.toUpperCase());
 }
+
 
 
 document.getElementById('updateCarRegBtn').addEventListener('click', () => {
