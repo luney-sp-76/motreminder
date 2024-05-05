@@ -23,7 +23,7 @@ function isValidEmail(email) {
 
 document.getElementById('updateEmailBtn').addEventListener('click', () => {
     const newEmail = document.getElementById('newEmail').value;
-    
+
      // Check if the email input is not empty and is valid
      if (!newEmail || !isValidEmail(newEmail)) {
         showAlert("Please enter a valid email address.", "error");
@@ -72,9 +72,22 @@ document.getElementById('closeAccountBtn').addEventListener('click', () => {
 });
 
 
+function isValidUKRegPlate(regPlate) {
+    // Regex to check various styles of UK plates
+    const regex = /^([A-Z]{2}\d{2} [A-Z]{3}|[A-Z]\d{1,3} [A-Z]{3}|[A-Z]{3} \d{1,3}[A-Z]|[A-Z]{1,3} \d{1,4}|[1-9]\d{0,3} [A-Z]{1,3}|[A-Z]{1,3} [1-9]\d{0,3})$/;
+    return regex.test(regPlate.toUpperCase());
+}
+
 
 document.getElementById('updateCarRegBtn').addEventListener('click', () => {
     const newCarRegistration = document.getElementById('newCarReg').value;
+    // Check if the email input is not empty and is valid
+    if (!newCarRegistration || !isValidUKRegPlate(newCarRegistration)) {
+        showAlert("Invalid registration number plate", "error");
+        console.error("Invalid registration number plate update input.");
+        return; // Stop the function if the email is not valid
+    }
+
     const userDocRef = doc(db, "reminders", user.uid);
     updateDoc(userDocRef, {
         regNumber: newCarRegistration
