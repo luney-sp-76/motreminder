@@ -71,7 +71,7 @@ jobs:
           echo "Starting Green Service..."
           /home/paulolphert/update_port.sh 8081
           sudo systemctl daemon-reload
-          sudo systemctl start motbookingreminder2.service
+          sudo systemctl restart motbookingreminder2.service
           sleep 5
           
           echo "Updating Nginx Configuration..."
