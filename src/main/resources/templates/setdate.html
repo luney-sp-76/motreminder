@@ -50,7 +50,7 @@
         </script>
 
   
-   <script>function formatDateToDDMMYYYY(dateInput) {
+   <!-- <script>function formatDateToDDMMYYYY(dateInput) {
         const date = new Date(dateInput);
         return new Intl.DateTimeFormat('en-GB', { 
             day: '2-digit', 
@@ -58,7 +58,19 @@
             year: 'numeric' 
         }).format(date);
     }
-    </script>
+    </script> -->
+
+<script>
+  function formatDateToDDMMYYYY(dateInput) {
+      const date = new Date(dateInput);
+      return new Intl.DateTimeFormat('en-GB', {
+          day: '2-digit',
+          month: 'short',  // Changed from '2-digit' to 'short' to get month abbreviation
+          year: 'numeric'
+      }).format(date); // Ensure the formatting includes dashes
+  }
+</script>
+
     
 <script type="module">
     
