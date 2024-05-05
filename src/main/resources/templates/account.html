@@ -20,11 +20,10 @@
           <div class="card-body">
             <h2 class="card-title">Account Profile</h2>
 
-           
-
+          
             <!-- Update Car Registration Number -->
             <form id="updateCarRegForm" class="mb-3">
-              <h4>Update Car Registration Number</h4>
+              <h4 id="updateCarRegHeader">Update Car Registration Number</h4>
               <div class="form-group">
                 <input type="text" class="form-control" id="newCarReg" placeholder="New Registration Number" />
               </div>
@@ -72,6 +71,44 @@
       import { adjustLoginLogoutLink } from "/js/firebase-status.js";
       adjustLoginLogoutLink();
     </script>
+    <script type="module">
+      // Import necessary Firestore functions from the SDK.
+      import { auth, db } from '/js/firebase-init.js';
+      import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  
+      document.addEventListener("DOMContentLoaded", () => {
+          auth.onAuthStateChanged((user) => {
+              if (user) {
+                  // Fetch the document using the user's UID.
+                  const reminderDocRef = doc(db, "reminders", user.uid);
+  
+                  getDoc(reminderDocRef).then((docSnap) => {
+                      if (docSnap.exists()) {
+                          // Extract the registration number from the Firestore document.
+                          const currentRegistrationNumber = docSnap.data().regNumber;
+  
+                          // Log the current registration number to the console.
+                          console.log("Current registration number:", currentRegistrationNumber);
+  
+                          // Update the header with the current registration number.
+                          document.getElementById('updateCarRegHeader').textContent = `Update ${currentRegistrationNumber} Car Registration Number`;
+                      } else {
+                          console.log("Document does not exist");
+                          document.getElementById('updateCarRegHeader').textContent = "Update Car Registration Number";
+                      }
+                  }).catch((error) => {
+                      console.error("Error fetching document:", error);
+                      document.getElementById('updateCarRegHeader').textContent = "Error loading registration number.";
+                  });
+              } else {
+                  console.log("User is not signed in");
+                  // Redirect to login page if the user is not signed in.
+                  window.location.href = "/login";
+              }
+          });
+      });
+  </script>
+  
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
