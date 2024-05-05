@@ -14,8 +14,22 @@ auth.onAuthStateChanged((user) => {
     if (user) {
 const user = auth.currentUser;
 
+function isValidEmail(email) {
+    // Regular expression for basic email validation
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return regex.test(email);
+}
+
+
 document.getElementById('updateEmailBtn').addEventListener('click', () => {
     const newEmail = document.getElementById('newEmail').value;
+    
+     // Check if the email input is not empty and is valid
+     if (!newEmail || !isValidEmail(newEmail)) {
+        showAlert("Please enter a valid email address.", "error");
+        console.error("Invalid email input.");
+        return; // Stop the function if the email is not valid
+    }
     updateEmail(user, newEmail).then(() => {
         console.log("Email updated successfully.");
         // Update email in Firestore
