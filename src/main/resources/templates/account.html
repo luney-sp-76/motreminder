@@ -75,6 +75,7 @@
       // Import necessary Firestore functions from the SDK.
       import { auth, db } from '/js/firebase-init.js';
       import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import {formatRegNumber} from '/js/format-regnumber.js';
   
       document.addEventListener("DOMContentLoaded", () => {
           auth.onAuthStateChanged((user) => {
@@ -86,12 +87,15 @@
                       if (docSnap.exists()) {
                           // Extract the registration number from the Firestore document.
                           const currentRegistrationNumber = docSnap.data().regNumber;
-  
-                          // Log the current registration number to the console.
-                          console.log("Current registration number:", currentRegistrationNumber);
+
+                          // Format the registration number correctly.
+                          const formattedRegNumber = formatRegNumber(currentRegistrationNumber);
+
+                          // Log the formatted registration number to the console.
+                          console.log("Formatted registration number:", formattedRegNumber);
   
                           // Update the header with the current registration number.
-                          document.getElementById('updateCarRegHeader').textContent = `Update ${currentRegistrationNumber} Car Registration Number`;
+                          document.getElementById('updateCarRegHeader').textContent = `Update ${formattedRegNumber} Car Registration Number`;
                       } else {
                           console.log("Document does not exist");
                           document.getElementById('updateCarRegHeader').textContent = "Update Car Registration Number";
