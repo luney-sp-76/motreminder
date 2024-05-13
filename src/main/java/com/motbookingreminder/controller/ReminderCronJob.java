@@ -10,6 +10,7 @@ import com.motbookingreminder.utilities.EmailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * This class represents a cron job for sending scheduled reminders.
  */
+@Component
 @Service
 public class ReminderCronJob {
 
@@ -49,7 +51,7 @@ public class ReminderCronJob {
                     String motExpiryDate = document.getString("motExpiryDate");
                     // Construct the email body
                     String emailBody = String.format(
-                            "This is a reminder that the MOT for %s expires on %s. Your reminder date is today %s.\n Please book your MoT at the nearest DVA Testing Centre.\n After your MoT why not come back and set a reminder for next time. Thank you for using MoT Booking Reminder.\n www.motbookingreminder.co.uk",
+                            "This is a reminder that the MOT for %s expires on %s. Your reminder date is today %s.\n Please book your MoT at the nearest DVA Testing Centre.\n After your MoT why not come back and set a reminder for next time. Thank you for using MoT Booking Reminder.\n https://motbookingreminder.co.uk",
                             regNumber,
                             motExpiryDate, reminderDate);
                     // Send the email
