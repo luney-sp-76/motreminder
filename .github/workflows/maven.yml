@@ -89,7 +89,7 @@ jobs:
             if [ "$STATUS" -eq 200 ]; then
               echo "Health check successful."
               echo "Updating Blue service with the latest artifact as backup..."
-              sudo cp /home/paulolphert/motbookingreminder/rest-service-0.0.2-SNAPSHOT.jar /home/paulolphert/motbookingreminder_backup/rest-service-0.0.1-SNAPSHOT.jar
+              sudo cp /home/paulolphert/motbookingreminder/rest-service-0.0.2-SNAPSHOT.jar /home/paulolphert/motbookingreminder/rest-service-0.0.1-SNAPSHOT.jar
               echo "Blue service backup updated successfully but not started."
               break
             else
