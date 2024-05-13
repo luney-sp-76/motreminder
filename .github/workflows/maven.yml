@@ -25,7 +25,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: rest-service-jar
-        path: target/rest-service-0.0.1-SNAPSHOT.jar
+        path: target/rest-service-0.0.2-SNAPSHOT.jar
 
   download-and-deploy:
     needs: build
@@ -88,31 +88,35 @@ jobs:
             STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://motbookingreminder.co.uk)
             if [ "$STATUS" -eq 200 ]; then
               echo "Health check successful."
+              echo "Updating Blue service with the latest artifact as backup..."
+              sudo cp /home/paulolphert/motbookingreminder/rest-service-0.0.2-SNAPSHOT.jar /home/paulolphert/motbookingreminder_backup/rest-service-0.0.1-SNAPSHOT.jar
+              echo "Blue service backup updated successfully but not started."
               break
             else
               echo "Health check attempt $attempt failed with status $STATUS."
               if [ $attempt -eq $max_attempts ]; then
                 echo "Health check failed after $max_attempts attempts. Reverting to Blue environment..."
-                # Stop the Green service as it is not stable
-                echo "Stopping the Green service ..."
+                echo "Stopping Green service..."
                 sudo systemctl stop motbookingreminder2.service
-                # revert the service-port to 8082
                 /home/paulolphert/update_port.sh 8082
                 export SERVICE_PORT=8082  # Revert to 8082 for blue deployment
-                envsubst '$SERVICE_PORT' <  /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
+                envsubst '$SERVICE_PORT' < /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
                 sudo systemctl daemon-reload
-                echo "Restarting the server ..."
-                # restart nginx
                 sudo nginx -s reload
-                echo "Restarting Blue Service ..."
+                echo "Restarting Blue Service..."
                 sudo systemctl restart motbookingreminder.service
                 sleep 5
-                echo "Job failed - reverted to port 8082 and default website"
+                echo "Job failed - reverted to port 8082 and Blue service."
                 exit 1
               fi
-              sleep 10  # Wait 10 seconds before retrying
+              sleep 10
               attempt=$((attempt + 1))
             fi
           done
-
           echo "Green deployment successful and verified!"
+
+
+  
+
+          
+
