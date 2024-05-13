@@ -104,6 +104,9 @@ jobs:
                 echo "Restarting the server ..."
                 # restart nginx
                 sudo nginx -s reload
+                echo "Restarting Blue Service ..."
+                sudo systemctl restart motbookingreminder.service
+                sleep 5
                 echo "Job failed - reverted to port 8082 and default website"
                 exit 1
               fi
