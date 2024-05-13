@@ -25,7 +25,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: rest-service-jar
-        path: target/rest-service-0.0.2-SNAPSHOT.jar
+        path: target/rest-service-0.0.1-SNAPSHOT.jar
 
   download-and-deploy:
     needs: build
