@@ -71,8 +71,63 @@
   }
 </script>
 
-    
 <script type="module">
+    
+  import { auth, db } from '/js/firebase-init.js';
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  
+  document.addEventListener("DOMContentLoaded", () => {
+      auth.onAuthStateChanged((user) => {
+          if (user) {
+              const reminderDocRef = doc(db, "reminders", user.uid); // Directly access the document using the user's UID
+
+              getDoc(reminderDocRef)
+                  .then((docSnap) => {
+                      if (docSnap.exists()) {
+                          const data = docSnap.data();
+                          const reminderDate = data.reminderDate ? new Date(data.reminderDate) : null;
+                          const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null;
+
+                          const formattedReminderDate = reminderDate ? formatDateToDDMMYYYY(reminderDate).replace(/\//g, '-') : "Not Available";
+                          const formattedMotExpiryDate = motExpiryDate ? formatDateToDDMMYYYY(motExpiryDate).replace(/\//g, '-') : "no expiry date";
+
+                          document.getElementById("displayReminderDate").innerText = `Reminder Date: ${formattedReminderDate}`;
+                          document.getElementById("registrationNumber").innerText = `Registration Number: ${data.regNumber || "Not Available"}`;
+                          document.getElementById("motExpiryDate").innerText = `MOT Expiry Date: ${formattedMotExpiryDate}`;
+
+                          if (reminderDate && motExpiryDate && reminderDate > motExpiryDate) {
+                              // Make the Change Date button pulse
+                              document.querySelector("a.btn").classList.add("pulse");
+
+                              // Add a note about the reminder and MOT expiry date issue
+                              const note = document.createElement("p");
+                              note.style.color = "red"; // Make the note stand out
+                              note.innerText = "Your reminder date should not be after the MOT expiry date.";
+                              document.querySelector(".container").appendChild(note);
+                          }
+
+                      } else {
+                          document.getElementById("displayReminderDate").innerText = "Reminder Date: Not Available";
+                          document.getElementById("registrationNumber").innerText = `Registration Number: ${docSnap.data().regNumber}`;
+                          document.getElementById("motExpiryDate").innerText = "MOT Expiry Date: no expiry date";
+                      }
+                  })
+                  .catch(error => {
+                      console.error("Error fetching reminder:", error);
+                      document.getElementById("displayReminderDate").innerText = "Error loading reminder.";
+                      document.getElementById("registrationNumber").innerText = "Registration Number: Not Available";
+                      document.getElementById("motExpiryDate").innerText = "MOT Expiry Date: Not Available";
+                  });
+          } else {
+              console.log("User is not signed in");
+              // Handle not signed in state (optional)
+              window.location.href = "/login";
+          }
+      });
+  });
+</script>
+    
+<!-- <script type="module">
     
     import { auth, db } from '/js/firebase-init.js';
     import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -120,7 +175,7 @@
           }
         });
       });
-</script>
+</script> -->
 <!-- Include Bootstrap JavaScript and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
