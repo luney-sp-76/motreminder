@@ -157,20 +157,22 @@
     })
   </script>
 
-<script type="module">
-  import { adjustLoginLogoutLink } from '/js/firebase-status.js'
-  adjustLoginLogoutLink()
-</script>
+  <script type="module">
+    import { adjustLoginLogoutLink } from '/js/firebase-status.js'
+    adjustLoginLogoutLink()
+  </script>
 
   <script th:inline="javascript">
     /*<![CDATA[*/
     var reminderDate = /*[[${reminderDate}]]*/ 'defaultDate'
     if (reminderDate !== 'defaultDate') {
       localStorage.setItem('reminderDate', reminderDate.toString())
-      
     }
     var motDate = /*[[${motDate}]]*/
     localStorage.setItem('motDate', motDate.toString())
+
+    var taxDate = /*[[${taxDate}]]*/
+    localStorage.setItem('taxDate', taxDate.toString())
 
     var regNumber = /*[[${registrationNumber}]]*/
     localStorage.setItem('regNumber', regNumber.toString())

@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Set Reminder</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-   
    
     <style>
       .centered-container {
@@ -20,6 +19,7 @@
           width: 100%;
           max-width: 330px;
           margin: auto;
+          margin-bottom: 20px;
       }
       .green-link {
           color: #28a745;
@@ -28,27 +28,48 @@
           margin-top: 20px;
           font-size: 0.9rem;
       }
-  </style>
+    </style>
   
 </head>
 <body>
   <div th:replace="~{navbar :: common-navbar}"></div>
   <div class="centered-container">
+      
+      <!-- Set MOT Reminder Form -->
       <div class="form-container">
-          <h1 class="h3 mb-3 font-weight-normal">Set Reminder</h1>
-          <form id="reminderForm" action="/setdate" method="post">
+          <h1 class="h3 mb-3 font-weight-normal">Set MOT Reminder</h1>
+          <form id="motReminderForm" action="/setdate" method="post">
               <div class="form-group mb-3">
-                  <label for="earliestDate">Earliest Booking Date</label>
-                  <input type="date" id="earliestDate" name="earliestDate" class="form-control" required> 
+                  <label for="motEarliestDate">Earliest Booking Date</label>
+                  <input type="date" id="motEarliestDate" name="earliestDate" class="form-control" required> 
               </div>
               <div class="form-group">
-                  <label for="customDate">Your Booking Date</label>
-                  <input type="date" id="customDate" name="customDate" class="form-control">
+                  <label for="motCustomDate">Your Booking Date</label>
+                  <input type="date" id="motCustomDate" name="customDate" class="form-control">
               </div>
-              <button class="btn btn-lg btn-primary btn-block" type="button" id="setReminderBtn">Set Reminder</button>
+              <button class="btn btn-lg btn-primary btn-block" type="button" id="setMotReminderBtn">Set MOT Reminder</button>
           </form>
           <div class="info-text">
               Note: If you don't select "Your Booking Date", the "Earliest Booking Date" will be automatically used when you set a reminder.
+          </div>
+      </div>
+      
+      <!-- Set Tax Reminder Form -->
+      <div class="form-container">
+          <h1 class="h3 mb-3 font-weight-normal">Set Tax Reminder</h1>
+          <form id="taxReminderForm" action="/setdate" method="post">
+              <div class="form-group mb-3">
+                  <label for="taxEarliestDate">Earliest Reminder Date</label>
+                  <input type="date" id="taxEarliestDate" name="earliestDate" class="form-control" required> 
+              </div>
+              <div class="form-group">
+                  <label for="taxCustomDate">Your Tax Date</label>
+                  <input type="date" id="taxCustomDate" name="customDate" class="form-control">
+              </div>
+              <button class="btn btn-lg btn-primary btn-block" type="button" id="setTaxReminderBtn">Set Tax Reminder</button>
+          </form>
+          <div class="info-text">
+              Note: If you don't select "Your Reminder Date", the "Earliest Reminder Date" will be automatically used when you set a reminder.
           </div>
       </div>
   </div>
@@ -56,72 +77,130 @@
 <script type="module">
   import { adjustLoginLogoutLink } from '/js/firebase-status.js'
   adjustLoginLogoutLink()
-  </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var storedDate = localStorage.getItem("reminderDate");
-        if (storedDate) {
-            document.getElementById("earliestDate").value = storedDate;
-        } else {
-            document.getElementById("earliestDate").value = new Date().toISOString().split('T')[0];
-        }
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Set initial dates
+    var motStoredDate = localStorage.getItem("motReminderDate");
+    var taxStoredDate = localStorage.getItem("taxReminderDate");
 
-        document.getElementById("setReminderBtn").addEventListener("click", function() {
-            var customDate = document.getElementById("customDate").value;
-            var earliestDate = document.getElementById("earliestDate").value;
+    if (motStoredDate) {
+      document.getElementById("motEarliestDate").value = motStoredDate;
+    } else {
+      document.getElementById("motEarliestDate").value = new Date().toISOString().split('T')[0];
+    }
 
-            if (!customDate) {
-                // If custom date is not set, use earliest date
-                customDate = earliestDate;
-            }
-       });
+    if (taxStoredDate) {
+      document.getElementById("taxEarliestDate").value = taxStoredDate;
+    } else {
+      document.getElementById("taxEarliestDate").value = new Date().toISOString().split('T')[0];
+    }
+
+    // Set MOT reminder
+    document.getElementById("setMotReminderBtn").addEventListener("click", function() {
+      var customDate = document.getElementById("motCustomDate").value;
+      var earliestDate = document.getElementById("motEarliestDate").value;
+
+      if (!customDate) {
+        customDate = earliestDate;
+      }
+
+      // Save to local storage
+      localStorage.setItem("motReminderDate", customDate);
+
+      alert("Your MOT reminder has been set.");
     });
+
+    // Set Tax reminder
+    document.getElementById("setTaxReminderBtn").addEventListener("click", function() {
+      var customDate = document.getElementById("taxCustomDate").value;
+      var earliestDate = document.getElementById("taxEarliestDate").value;
+
+      if (!customDate) {
+        customDate = earliestDate;
+      }
+
+      // Save to local storage
+      localStorage.setItem("taxReminderDate", customDate);
+
+      alert("Your Tax reminder has been set.");
+    });
+  });
 </script>
 <script type="module">
-import { auth, db } from '/js/firebase-init.js'; // Assumes `auth` and `db` are exported from this module
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { auth, db } from '/js/firebase-init.js'; 
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const setReminderBtn = document.getElementById("setReminderBtn");
-  if (setReminderBtn) {
-    setReminderBtn.addEventListener("click", async () => {
-      const user = auth.currentUser;
-      if (user) {
-          const customDate = document.getElementById("customDate").value || document.getElementById("earliestDate").value;
+  document.addEventListener("DOMContentLoaded", () => {
+    const setMotReminderBtn = document.getElementById("setMotReminderBtn");
+    const setTaxReminderBtn = document.getElementById("setTaxReminderBtn");
+
+    if (setMotReminderBtn) {
+      setMotReminderBtn.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (user) {
+          const customDate = document.getElementById("motCustomDate").value || document.getElementById("motEarliestDate").value;
           
-          // Directly target the document in the 'reminders' collection with the user's UID
           const reminderRef = doc(db, "reminders", user.uid);
+          const taxDate = localStorage.getItem('taxDate'); // Get the tax date from local storage
           
           try {
-              await setDoc(reminderRef, {
-                  email: user.email, // User's email
-                  userID: user.uid, // Firebase Auth User ID, redundant if using UID as doc ID
-                  reminderDate: customDate,
-                  motExpiryDate: localStorage.getItem('motDate'),
-                  regNumber: localStorage.getItem('regNumber')
-              }, { merge: true }); // Use merge true to not overwrite other fields accidentally
+            await setDoc(reminderRef, {
+              email: user.email,
+              userID: user.uid,
+              motReminderDate: customDate,
+              taxDueDate: taxDate // Add TaxDate to the Firebase document
+            }, { merge: true });
 
-              console.log("Reminder set successfully.");
-              alert("Your reminder has been set.");
-              // Redirect or update UI as needed
-              window.location.href = "/setdate";
+            console.log("MOT Reminder set successfully.");
+            alert("Your MOT reminder has been set.");
+            window.location.href = "/setdate";
           } catch (error) {
-              console.error("Error setting reminder: ", error);
-              alert("Failed to set reminder.");
+            console.error("Error setting MOT reminder: ", error);
+            alert("Failed to set MOT reminder.");
           }
-      } else {
+        } else {
           console.log("No user is signed in.");
           alert("Please sign in to set a reminder.");
           window.location.href = "/login?redirect=set-reminder";
-      }
-    });
-  }
-});
+        }
+      });
+    }
+
+    if (setTaxReminderBtn) {
+      setTaxReminderBtn.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (user) {
+          const customDate = document.getElementById("taxCustomDate").value || document.getElementById("taxEarliestDate").value;
+          
+          const reminderRef = doc(db, "reminders", user.uid);
+          
+          try {
+            await setDoc(reminderRef, {
+              email: user.email,
+              userID: user.uid,
+              taxReminderDate: customDate
+            }, { merge: true });
+
+            console.log("Tax Reminder set successfully.");
+            alert("Your Tax reminder has been set.");
+            window.location.href = "/setdate";
+          } catch (error) {
+            console.error("Error setting Tax reminder: ", error);
+            alert("Failed to set Tax reminder.");
+          }
+        } else {
+          console.log("No user is signed in.");
+          alert("Please sign in to set a reminder.");
+          window.location.href = "/login?redirect=set-reminder";
+        }
+      });
+    }
+  });
 </script>
 <!-- Include Bootstrap JavaScript and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  </body>
+</body>
 </html>
-

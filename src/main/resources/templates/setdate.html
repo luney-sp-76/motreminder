@@ -4,15 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calendar</title>
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
-    <style>
-      .container {
-        padding-top: 50px;
-      }
-    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <style>
       .container {
         padding-top: 50px;
@@ -26,20 +18,33 @@
         animation: pulseAnimation 1s infinite;
       }
     </style>
-    
   </head>
   <body>
     <div th:replace="~{navbar :: common-navbar}"></div>
     <div class="container">
       <h1 id="registrationNumber" class="lead">Loading Registration...</h1>
       <h2 id="motExpiryDate" class="lead">Loading MOT Expiry Date...</h2>
+      <h2 id="taxDueDate" class="lead">Loading Tax Due Date...</h2>
+      
       <div class="row">
         <div class="container text-center mt-5">
-            <h1>Your Reminder</h1>
-            <p id="displayReminderDate" class="lead">Loading reminder...</p>
-            <a href="/setreminder" class="btn btn-primary">Change Date</a>
+          <h1>Your MOT Reminder</h1>
+          <p id="displayMotReminderDate" class="lead">Loading reminder...</p>
+          <a href="/setreminder" class="btn btn-primary">Change Date</a>
         </div>
-          </div>
+      </div>
+      <div class="row">
+        <div class="container text-center mt-5">
+          <h1>Your Tax Reminder</h1>
+          <p id="displayTaxReminderDate" class="lead">Loading reminder...</p>
+          <form id="taxReminderForm">
+            <div class="form-group">
+              <label for="taxReminderDate">Tax Reminder Date:</label>
+              <input type="date" id="taxReminderDate" class="form-control" required>
+            </div>
+            <button type="button" class="btn btn-primary" id="setTaxReminderBtn">Set Tax Reminder</button>
+          </form>
+          <a href="/setreminder" class="btn btn-primary mt-3">Change Date</a>
         </div>
       </div>
     </div>
@@ -47,138 +52,129 @@
     <script type="module">
         import { adjustLoginLogoutLink } from '/js/firebase-status.js'
         adjustLoginLogoutLink()
-        </script>
+    </script>
 
-  
-   <!-- <script>function formatDateToDDMMYYYY(dateInput) {
-        const date = new Date(dateInput);
-        return new Intl.DateTimeFormat('en-GB', { 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric' 
-        }).format(date);
-    }
-    </script> -->
+    <script>
+      function formatDateToDDMMYYYY(dateInput) {
+          const date = new Date(dateInput);
+          return new Intl.DateTimeFormat('en-GB', {
+              day: '2-digit',
+              month: 'short',  // Changed from '2-digit' to 'short' to get month abbreviation
+              year: 'numeric'
+          }).format(date); // Ensure the formatting includes dashes
+      }
+    </script>
 
-<script>
-  function formatDateToDDMMYYYY(dateInput) {
-      const date = new Date(dateInput);
-      return new Intl.DateTimeFormat('en-GB', {
-          day: '2-digit',
-          month: 'short',  // Changed from '2-digit' to 'short' to get month abbreviation
-          year: 'numeric'
-      }).format(date); // Ensure the formatting includes dashes
-  }
-</script>
+    <script type="module">
+      import { auth, db } from '/js/firebase-init.js';
+      import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-<script type="module">
-    
-  import { auth, db } from '/js/firebase-init.js';
-  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-  
-  document.addEventListener("DOMContentLoaded", () => {
-      auth.onAuthStateChanged((user) => {
-          if (user) {
-              const reminderDocRef = doc(db, "reminders", user.uid); // Directly access the document using the user's UID
-
-              getDoc(reminderDocRef)
-                  .then((docSnap) => {
-                      if (docSnap.exists()) {
-                          const data = docSnap.data();
-                          const reminderDate = data.reminderDate ? new Date(data.reminderDate) : null;
-                          const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null;
-
-                          const formattedReminderDate = reminderDate ? formatDateToDDMMYYYY(reminderDate).replace(/\//g, '-') : "Not Available";
-                          const formattedMotExpiryDate = motExpiryDate ? formatDateToDDMMYYYY(motExpiryDate).replace(/\//g, '-') : "no expiry date";
-
-                          document.getElementById("displayReminderDate").innerText = `Reminder Date: ${formattedReminderDate}`;
-                          document.getElementById("registrationNumber").innerText = `Registration Number: ${data.regNumber || "Not Available"}`;
-                          document.getElementById("motExpiryDate").innerText = `MOT Expiry Date: ${formattedMotExpiryDate}`;
-
-                          if (reminderDate && motExpiryDate && reminderDate > motExpiryDate) {
-                              // Make the Change Date button pulse
-                              document.querySelector("a.btn").classList.add("pulse");
-
-                              // Add a note about the reminder and MOT expiry date issue
-                              const note = document.createElement("p");
-                              note.style.color = "red"; // Make the note stand out
-                              note.innerText = "Your reminder date should not be after the MOT expiry date.";
-                              document.querySelector(".container").appendChild(note);
-                          }
-
-                      } else {
-                          document.getElementById("displayReminderDate").innerText = "Reminder Date: Not Available";
-                          document.getElementById("registrationNumber").innerText = `Registration Number: ${docSnap.data().regNumber}`;
-                          document.getElementById("motExpiryDate").innerText = "MOT Expiry Date: no expiry date";
-                      }
-                  })
-                  .catch(error => {
-                      console.error("Error fetching reminder:", error);
-                      document.getElementById("displayReminderDate").innerText = "Error loading reminder.";
-                      document.getElementById("registrationNumber").innerText = "Registration Number: Not Available";
-                      document.getElementById("motExpiryDate").innerText = "MOT Expiry Date: Not Available";
-                  });
-          } else {
-              console.log("User is not signed in");
-              // Handle not signed in state (optional)
-              window.location.href = "/login";
-          }
-      });
-  });
-</script>
-    
-<!-- <script type="module">
-    
-    import { auth, db } from '/js/firebase-init.js';
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
       document.addEventListener("DOMContentLoaded", () => {
-        auth.onAuthStateChanged((user) => {
-          if (user) {
-            const reminderDocRef = doc(db, "reminders", user.uid); // Directly access the document using the user's UID
+          auth.onAuthStateChanged((user) => {
+              if (user) {
+                  const reminderDocRef = doc(db, "reminders", user.uid); // Directly access the document using the user's UID
 
-            getDoc(reminderDocRef)
-              .then((docSnap) => {
-                if (docSnap.exists() && docSnap.data().reminderDate) {
-                  const reminderDate = new Date(docSnap.data().reminderDate);
-                    const motExpiryDate = new Date(docSnap.data().motExpiryDate);
-                    const formattedReminderDate = formatDateToDDMMYYYY(reminderDate).replace(/\//g, '-');
-                    const formattedMotExpiryDate = formatDateToDDMMYYYY(motExpiryDate).replace(/\//g, '-');
+                  getDoc(reminderDocRef)
+                      .then((docSnap) => {
+                          if (docSnap.exists()) {
+                              const data = docSnap.data();
+                              
+                              const motReminderDate = data.reminderDate ? new Date(data.reminderDate) : null;
+                              const taxReminderDate = data.taxReminderDate ? new Date(data.taxReminderDate) : null;
+                              const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null;
+                              const taxDueDate = data.taxDueDate ? new Date(data.taxDueDate) : null;
 
-                    document.getElementById("displayReminderDate").innerText = `Reminder Date: ${formattedReminderDate}`;
-                    document.getElementById("registrationNumber").innerText = `Registration Number: ${docSnap.data().regNumber}`;
-                    document.getElementById("motExpiryDate").innerText = `MOT Expiry Date: ${formattedMotExpiryDate}`;
+                              const formattedMotReminderDate = motReminderDate ? formatDateToDDMMYYYY(motReminderDate).replace(/\//g, '-') : "Not Available";
+                              const formattedTaxReminderDate = taxReminderDate ? formatDateToDDMMYYYY(taxReminderDate).replace(/\//g, '-') : "Not Available";
+                              const formattedMotExpiryDate = motExpiryDate ? formatDateToDDMMYYYY(motExpiryDate).replace(/\//g, '-') : "no expiry date";
+                              const formattedTaxDueDate = taxDueDate ? formatDateToDDMMYYYY(taxDueDate).replace(/\//g, '-') : "no due date";
 
-                    // Compare dates to update UI
-                    if (reminderDate > motExpiryDate) {
-                        // Make the Change Date button pulse
-                        document.querySelector("a.btn").classList.add("pulse");
+                              document.getElementById("displayMotReminderDate").innerText = `Reminder Date: ${formattedMotReminderDate}`;
+                              document.getElementById("displayTaxReminderDate").innerText = `Reminder Date: ${formattedTaxReminderDate}`;
+                              document.getElementById("registrationNumber").innerText = `Registration Number: ${data.regNumber || "Not Available"}`;
+                              document.getElementById("motExpiryDate").innerText = `MOT Expiry Date: ${formattedMotExpiryDate}`;
+                              document.getElementById("taxDueDate").innerText = `Tax Due Date: ${formattedTaxDueDate}`;
 
-                        // Add a note about the reminder and MOT expiry date issue
-                        const note = document.createElement("p");
-                        note.style.color = "red"; // Make the note stand out
-                        note.innerText = "Your reminder date should not be after the MOT expiry date.";
-                        document.querySelector(".container").appendChild(note);
-                    }
+                              if (motReminderDate && motExpiryDate && motReminderDate > motExpiryDate) {
+                                  // Make the Change Date button pulse for MOT reminder
+                                  document.querySelector("a.btn").classList.add("pulse");
 
+                                  // Add a note about the reminder and MOT expiry date issue
+                                  const note = document.createElement("p");
+                                  note.style.color = "red"; // Make the note stand out
+                                  note.innerText = "Your MOT reminder date should not be after the MOT expiry date.";
+                                  document.querySelector(".container").appendChild(note);
+                              }
+
+                              if (taxReminderDate && taxDueDate && taxReminderDate > taxDueDate) {
+                                  // Make the Change Date button pulse for Tax reminder
+                                  document.querySelectorAll("a.btn")[1].classList.add("pulse");
+
+                                  // Add a note about the reminder and Tax due date issue
+                                  const note = document.createElement("p");
+                                  note.style.color = "red"; // Make the note stand out
+                                  note.innerText = "Your Tax reminder date should not be after the Tax due date.";
+                                  document.querySelector(".container").appendChild(note);
+                              }
+
+                          } else {
+                              document.getElementById("displayMotReminderDate").innerText = "Reminder Date: Not Available";
+                              document.getElementById("displayTaxReminderDate").innerText = "Reminder Date: Not Available";
+                              document.getElementById("registrationNumber").innerText = `Registration Number: Not Available`;
+                              document.getElementById("motExpiryDate").innerText = "MOT Expiry Date: no expiry date";
+                              document.getElementById("taxDueDate").innerText = "Tax Due Date: no due date";
+                          }
+                      })
+                      .catch(error => {
+                          console.error("Error fetching reminder:", error);
+                          document.getElementById("displayMotReminderDate").innerText = "Error loading reminder.";
+                          document.getElementById("displayTaxReminderDate").innerText = "Error loading reminder.";
+                          document.getElementById("registrationNumber").innerText = "Registration Number: Not Available";
+                          document.getElementById("motExpiryDate").innerText = "MOT Expiry Date: Not Available";
+                          document.getElementById("taxDueDate").innerText = "Tax Due Date: Not Available";
+                      });
               } else {
-          document.getElementById("displayReminderDate").innerText = "No reminder set.";
-        }
-            
-      }).catch(error => {
-        console.error("Error fetching reminder:", error);
-        document.getElementById("displayReminderDate").innerText = "Error loading reminder.";
+                  console.log("User is not signed in");
+                  // Handle not signed in state (optional)
+                  window.location.href = "/login";
+              }
+          });
+
+          document.getElementById("setTaxReminderBtn").addEventListener("click", async () => {
+              const user = auth.currentUser;
+              if (user) {
+                  const taxReminderDateInput = document.getElementById("taxReminderDate").value;
+                  const taxDueDate = new Date(localStorage.getItem("taxDate")); // Assume this is stored as 'taxDate'
+
+                  if (taxReminderDateInput && new Date(taxReminderDateInput) < taxDueDate) {
+                      const taxReminderDate = new Date(taxReminderDateInput);
+                      const reminderRef = doc(db, "reminders", user.uid);
+
+                      try {
+                          await setDoc(reminderRef, {
+                              taxReminderDate: taxReminderDate.toISOString() // Save as ISO string
+                          }, { merge: true });
+
+                          alert("Your Tax reminder has been set.");
+                          window.location.href = "/setdate";
+                      } catch (error) {
+                          console.error("Error setting Tax reminder: ", error);
+                          alert("Failed to set Tax reminder.");
+                      }
+                  } else {
+                      alert("Tax reminder date must be before the Tax due date.");
+                  }
+              } else {
+                  alert("Please sign in to set a reminder.");
+                  window.location.href = "/login?redirect=set-reminder";
+              }
+          });
       });
-          } else {
-            console.log("User is not signed in");
-            // Handle not signed in state (optional)
-            window.location.href = "/login";
-          }
-        });
-      });
-</script> -->
-<!-- Include Bootstrap JavaScript and dependencies -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </script>
+    
+    <!-- Include Bootstrap JavaScript and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
 </html>
