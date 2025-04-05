@@ -79,7 +79,7 @@
                           if (docSnap.exists()) {
                               const data = docSnap.data();
                               
-                              const motReminderDate = data.reminderDate ? new Date(data.reminderDate) : null;
+                              const motReminderDate = data.reminderDate ? new Date(data.motReminderDate) : null;
                               const taxReminderDate = data.taxReminderDate ? new Date(data.taxReminderDate) : null;
                               const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null;
                               const taxDueDate = data.taxDueDate ? new Date(data.taxDueDate) : null;
