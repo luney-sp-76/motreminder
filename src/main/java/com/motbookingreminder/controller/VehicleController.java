@@ -95,6 +95,7 @@ public class VehicleController {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy");
                 String formattedDate = localMotExpiryDate.format(formatter);
                 model.addAttribute("motDate", formattedDate);
+                model.addAttribute("motDateIso", localMotExpiryDate.toString());
             }
 
             // Assuming Car class has a method getMotExpiryDate() that returns the MOT date

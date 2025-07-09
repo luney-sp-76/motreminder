@@ -30,7 +30,7 @@
         <div class="container text-center mt-5">
           <h1>Your MOT Reminder</h1>
           <p id="displayMotReminderDate" class="lead">Loading reminder...</p>
-          <a href="/setreminder" class="btn btn-primary">Change Date</a>
+          <a href="/setreminder" class="btn btn-primary" id="changeMotDateBtn">Change Date</a>
         </div>
       </div>
       <div class="row">
@@ -44,7 +44,7 @@
             </div>
             <button type="button" class="btn btn-primary" id="setTaxReminderBtn">Set Tax Reminder</button>
           </form>
-          <a href="/setreminder" class="btn btn-primary mt-3">Change Date</a>
+          <a href="/setreminder" class="btn btn-primary mt-3" id="changeTaxDateBtn">Change Date</a>
         </div>
       </div>
     </div>
@@ -81,7 +81,8 @@
                               
                               const motReminderDate = data.reminderDate ? new Date(data.motReminderDate) : null;
                               const taxReminderDate = data.taxReminderDate ? new Date(data.taxReminderDate) : null;
-                              const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null;
+                              // const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null; // Changed to use motDateIso from Firestore
+                              const motExpiryDate = data.motDateIso ? new Date(data.motDateIso) : null;
                               const taxDueDate = data.taxDueDate ? new Date(data.taxDueDate) : null;
 
                               const formattedMotReminderDate = motReminderDate ? formatDateToDDMMYYYY(motReminderDate).replace(/\//g, '-') : "Not Available";
@@ -97,7 +98,7 @@
 
                               if (motReminderDate && motExpiryDate && motReminderDate > motExpiryDate) {
                                   // Make the Change Date button pulse for MOT reminder
-                                  document.querySelector("a.btn").classList.add("pulse");
+                                  document.getElementById("changeMotDateBtn").classList.add("pulse");
 
                                   // Add a note about the reminder and MOT expiry date issue
                                   const note = document.createElement("p");
@@ -108,7 +109,7 @@
 
                               if (taxReminderDate && taxDueDate && taxReminderDate > taxDueDate) {
                                   // Make the Change Date button pulse for Tax reminder
-                                  document.querySelectorAll("a.btn")[1].classList.add("pulse");
+                                  document.getElementById("changeTaxDateBtn").classList.add("pulse");
 
                                   // Add a note about the reminder and Tax due date issue
                                   const note = document.createElement("p");
@@ -144,9 +145,16 @@
               const user = auth.currentUser;
               if (user) {
                   const taxReminderDateInput = document.getElementById("taxReminderDate").value;
-                  const taxDueDate = new Date(localStorage.getItem("taxDate")); // Assume this is stored as 'taxDate'
+                  const taxDueDateText = document.getElementById("taxDueDate").innerText.replace('Tax Due Date: ', '');
+                  
+                  if (!taxReminderDateInput) {
+                      alert("Please select a tax reminder date.");
+                      return;
+                  }
 
-                  if (taxReminderDateInput && new Date(taxReminderDateInput) < taxDueDate) {
+                  // We need to parse the formatted date string back to a Date object for comparison
+                  const taxDueDate = new Date(taxDueDateText);
+                  if (taxDueDateText !== "no due date" && new Date(taxReminderDateInput) < taxDueDate) {
                       const taxReminderDate = new Date(taxReminderDateInput);
                       const reminderRef = doc(db, "reminders", user.uid);
 
@@ -162,7 +170,11 @@
                           alert("Failed to set Tax reminder.");
                       }
                   } else {
-                      alert("Tax reminder date must be before the Tax due date.");
+                      if (taxDueDateText === "no due date") {
+                          alert("Cannot set reminder as Tax due date is not available.");
+                      } else {
+                          alert("Tax reminder date must be before the Tax due date.");
+                      }
                   }
               } else {
                   alert("Please sign in to set a reminder.");
