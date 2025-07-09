@@ -32,6 +32,8 @@ public class VehicleController {
     public String getVehicleDetails(@RequestParam("registrationNumber") String registrationNumber, Model model) {
         try {
             String jsonResponse = vehicleService.getVehicleDetails(registrationNumber);
+            // Debug: Log the raw JSON response from the vehicle service
+            System.out.println("Vehicle JSON response: " + jsonResponse);
 
             if (jsonResponse.equals(
                     "Please check the registration number and try again. If the problem persists, contact support.")) {
@@ -43,6 +45,8 @@ public class VehicleController {
 
             // Assuming this returns a java.util.Date
             Date motExpiryDate = car.getMotExpiryDate();
+            // Debug: Log the raw MOT expiry date value
+            System.out.println("MOT expiry raw date: " + motExpiryDate);
             LocalDate localMotExpiryDate = LocalDate.now();
 
             if (motExpiryDate == null) {
