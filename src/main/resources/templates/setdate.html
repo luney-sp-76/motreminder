@@ -81,8 +81,8 @@
                               
                               const motReminderDate = data.reminderDate ? new Date(data.motReminderDate) : null;
                               const taxReminderDate = data.taxReminderDate ? new Date(data.taxReminderDate) : null;
-                              // const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null; // Changed to use motDateIso from Firestore
-                              const motExpiryDate = data.motDateIso ? new Date(data.motDateIso) : null;
+                              const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null; // Changed to use motDateIso from Firestore
+                              //const motExpiryDate = data.motDateIso ? new Date(data.motDateIso) : null;
                               const taxDueDate = data.taxDueDate ? new Date(data.taxDueDate) : null;
 
                               const formattedMotReminderDate = motReminderDate ? formatDateToDDMMYYYY(motReminderDate).replace(/\//g, '-') : "Not Available";
