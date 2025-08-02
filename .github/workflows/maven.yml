@@ -29,7 +29,7 @@ jobs:
 
   download-and-deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: Get Most Recent Artifact ID
       id: fetch-artifact-id
@@ -63,13 +63,13 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "$ARTIFACT_URL"
           unzip -o latest_artifact.zip -d ./extracted
-          sudo mv ./extracted/* /home/paulolphert/motbookingreminder/
+          sudo mv ./extracted/* /home/paul/motbookingreminder/
           rm -f latest_artifact.zip
           rm -rf ./extracted
           echo "Deployment completed successfully."
           
           echo "Starting Green Service..."
-          /home/paulolphert/update_port.sh 8081
+          /home/paul/update_port.sh 8081
           sudo systemctl daemon-reload
           sudo systemctl restart motbookingreminder2.service
           sleep 5
@@ -89,7 +89,7 @@ jobs:
             if [ "$STATUS" -eq 200 ]; then
               echo "Health check successful."
               echo "Updating Blue service with the latest artifact as backup..."
-              sudo cp /home/paulolphert/motbookingreminder/rest-service-0.0.2-SNAPSHOT.jar /home/paulolphert/motbookingreminder/rest-service-0.0.1-SNAPSHOT.jar
+              sudo cp /home/paul/motbookingreminder/rest-service-0.0.2-SNAPSHOT.jar /home/paul/motbookingreminder/rest-service-0.0.1-SNAPSHOT.jar
               echo "Blue service backup updated successfully but not started."
               break
             else
