@@ -34,11 +34,12 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    - name: Debug sudo
+    - name: Debug TTY and Shell
       run: |
-        echo "Running as: $(whoami)"
+        echo "whoami: $(whoami)"
+        echo "tty: $(tty || echo 'no tty')"
+        echo "SHELL: $SHELL"
         sudo -l
-        sudo -n /usr/bin/systemctl daemon-reload || echo "FAILED: daemon-reload"
     - name: Who am I?
       run: |
         echo "Running as: $(whoami)"
