@@ -36,7 +36,7 @@ jobs:
     steps:
     - name: Debug sudo
       run: |
-        echo "Running as: $(whoamI)"
+        echo "Running as: $(whoami)"
         sudo -l
         sudo -n /usr/bin/systemctl daemon-reload || echo "FAILED: daemon-reload"
     - name: Who am I?
