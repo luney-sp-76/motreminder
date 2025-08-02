@@ -43,6 +43,12 @@ jobs:
       run: |
         echo "Running as: $(whoami)"
         id
+    - name: Force bash and print shell info
+      run: |
+        echo "Shell: $SHELL"
+        bash -c 'echo Bash inside shell: $SHELL'
+        sudo -n whoami
+      shell: bash
     - name: Download Artifact
       uses: actions/download-artifact@v4
       with:
