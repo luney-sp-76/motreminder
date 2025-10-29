@@ -22,6 +22,14 @@
   <body>
     <div th:replace="~{navbar :: common-navbar}"></div>
     <div class="container">
+      <!-- Navigation breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/vehicles">My Vehicles</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Vehicle Reminders</li>
+        </ol>
+      </nav>
+      
       <h1 id="registrationNumber" class="lead">Loading Registration...</h1>
       <h2 id="motExpiryDate" class="lead">Loading MOT Expiry Date...</h2>
       <h2 id="taxDueDate" class="lead">Loading Tax Due Date...</h2>
@@ -54,57 +62,147 @@
         adjustLoginLogoutLink()
     </script>
 
-    <script>
-      function formatDateToDDMMYYYY(dateInput) {
-          const date = new Date(dateInput);
-          return new Intl.DateTimeFormat('en-GB', {
-              day: '2-digit',
-              month: 'short',  // Changed from '2-digit' to 'short' to get month abbreviation
-              year: 'numeric'
-          }).format(date); // Ensure the formatting includes dashes
-      }
-    </script>
-
     <script type="module">
       import { auth, db } from '/js/firebase-init.js';
       import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { formatDateToDDMMMYYYY } from '/js/formatDateToDDMMYYYY.js';
 
       document.addEventListener("DOMContentLoaded", () => {
-          auth.onAuthStateChanged((user) => {
+          auth.onAuthStateChanged(async (user) => {
               if (user) {
+                  const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
+                  
+                  if (!selectedVehicle) {
+                      alert("No vehicle selected. Please select a vehicle first.");
+                      window.location.href = "/vehicles";
+                      return;
+                  }
+                  
+                  console.log("Selected vehicle:", selectedVehicle);
+                  
+                  // Check if we have local vehicle data that needs to be saved first
+                  const localVehicleData = localStorage.getItem('currentVehicleData');
+                  if (localVehicleData) {
+                      try {
+                          const vehicleData = JSON.parse(localVehicleData);
+                          const userDocRef = doc(db, "reminders", user.uid);
+                          
+                          // Save vehicle to Firebase first
+                          await setDoc(userDocRef, {
+                              email: user.email,
+                              userID: user.uid,
+                              [`vehicles.${vehicleData.regNumber}`]: vehicleData
+                          }, { merge: true });
+                          
+                          console.log("Saved local vehicle data to Firebase");
+                      } catch (error) {
+                          console.error("Error saving local vehicle data:", error);
+                      }
+                  }
+
                   const reminderDocRef = doc(db, "reminders", user.uid); // Directly access the document using the user's UID
 
                   getDoc(reminderDocRef)
                       .then((docSnap) => {
                           if (docSnap.exists()) {
                               const data = docSnap.data();
+                              let vehicleData = null;
                               
-                              const motReminderDate = data.reminderDate ? new Date(data.motReminderDate) : null;
-                              const taxReminderDate = data.taxReminderDate ? new Date(data.taxReminderDate) : null;
-                              const motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null; // Changed to use motDateIso from Firestore
-                              //const motExpiryDate = data.motDateIso ? new Date(data.motDateIso) : null;
-                              const taxDueDate = data.taxDueDate ? new Date(data.taxDueDate) : null;
+                              // Check if using new multi-vehicle structure
+                              if (data.vehicles && data.vehicles[selectedVehicle]) {
+                                  vehicleData = data.vehicles[selectedVehicle];
+                              } else if (data.regNumber === selectedVehicle) {
+                                  // Legacy single vehicle structure
+                                  vehicleData = data;
+                              }
+                              
+                              if (!vehicleData) {
+                                  // Try to get data from localStorage as fallback
+                                  const localVehicleData = localStorage.getItem('currentVehicleData');
+                                  if (localVehicleData) {
+                                      try {
+                                          vehicleData = JSON.parse(localVehicleData);
+                                          console.log("Using local vehicle data:", vehicleData);
+                                      } catch (error) {
+                                          console.error("Error parsing local vehicle data:", error);
+                                      }
+                                  }
+                                  
+                                  if (!vehicleData) {
+                                      document.getElementById("registrationNumber").innerText = `Registration Number: ${selectedVehicle}`;
+                                      document.getElementById("displayMotReminderDate").innerText = "Reminder Date: Not Available";
+                                      document.getElementById("displayTaxReminderDate").innerText = "Reminder Date: Not Available";
+                                      document.getElementById("motExpiryDate").innerText = "MOT Expiry Date: no expiry date";
+                                      document.getElementById("taxDueDate").innerText = "Tax Due Date: no due date";
+                                      return;
+                                  }
+                              }
+                              
+                              let motReminderDate = vehicleData.motReminderDate ? new Date(vehicleData.motReminderDate) : null;
+                              const taxReminderDate = vehicleData.taxReminderDate ? new Date(vehicleData.taxReminderDate) : null;
+                              const motExpiryDate = vehicleData.motExpiryDate ? new Date(vehicleData.motExpiryDate) : null;
+                              const taxDueDate = vehicleData.taxDueDate ? new Date(vehicleData.taxDueDate) : null;
 
-                              const formattedMotReminderDate = motReminderDate ? formatDateToDDMMYYYY(motReminderDate).replace(/\//g, '-') : "Not Available";
-                              const formattedTaxReminderDate = taxReminderDate ? formatDateToDDMMYYYY(taxReminderDate).replace(/\//g, '-') : "Not Available";
-                              const formattedMotExpiryDate = motExpiryDate ? formatDateToDDMMYYYY(motExpiryDate).replace(/\//g, '-') : "no expiry date";
-                              const formattedTaxDueDate = taxDueDate ? formatDateToDDMMYYYY(taxDueDate).replace(/\//g, '-') : "no due date";
+                              // Calculate MOT reminder date as 3 months before MOT expiry date
+                              if (motExpiryDate && !motReminderDate) {
+                                  motReminderDate = new Date(motExpiryDate);
+                                  motReminderDate.setMonth(motReminderDate.getMonth() - 3);
+                                  
+                                  // Update the database with the calculated reminder date
+                                  setDoc(reminderDocRef, {
+                                      motReminderDate: motReminderDate.toISOString()
+                                  }, { merge: true }).catch(error => {
+                                      console.error("Error updating MOT reminder date:", error);
+                                  });
+                              } else if (motExpiryDate && motReminderDate) {
+                                  // Check if we need to recalculate based on a new MOT expiry date
+                                  const calculatedReminderDate = new Date(motExpiryDate);
+                                  calculatedReminderDate.setMonth(calculatedReminderDate.getMonth() - 3);
+                                  
+                                  // If the stored reminder date is significantly different from calculated, update it
+                                  const timeDiff = Math.abs(motReminderDate.getTime() - calculatedReminderDate.getTime());
+                                  const daysDiff = timeDiff / (1000 * 3600 * 24);
+                                  
+                                  if (daysDiff > 7) { // If more than 7 days difference, update
+                                      motReminderDate = calculatedReminderDate;
+                                      setDoc(reminderDocRef, {
+                                          motReminderDate: motReminderDate.toISOString()
+                                      }, { merge: true }).catch(error => {
+                                          console.error("Error updating MOT reminder date:", error);
+                                      });
+                                  }
+                              }
+
+                              const formattedMotReminderDate = motReminderDate ? formatDateToDDMMMYYYY(motReminderDate).replace(/\//g, '-') : "Not Available";
+                              const formattedTaxReminderDate = taxReminderDate ? formatDateToDDMMMYYYY(taxReminderDate).replace(/\//g, '-') : "Not Available";
+                              const formattedMotExpiryDate = motExpiryDate ? formatDateToDDMMMYYYY(motExpiryDate).replace(/\//g, '-') : "no expiry date";
+                              const formattedTaxDueDate = taxDueDate ? formatDateToDDMMMYYYY(taxDueDate).replace(/\//g, '-') : "no due date";
 
                               document.getElementById("displayMotReminderDate").innerText = `Reminder Date: ${formattedMotReminderDate}`;
                               document.getElementById("displayTaxReminderDate").innerText = `Reminder Date: ${formattedTaxReminderDate}`;
-                              document.getElementById("registrationNumber").innerText = `Registration Number: ${data.regNumber || "Not Available"}`;
+                              document.getElementById("registrationNumber").innerText = `Registration Number: ${vehicleData.regNumber || selectedVehicle}`;
                               document.getElementById("motExpiryDate").innerText = `MOT Expiry Date: ${formattedMotExpiryDate}`;
                               document.getElementById("taxDueDate").innerText = `Tax Due Date: ${formattedTaxDueDate}`;
 
-                              if (motReminderDate && motExpiryDate && motReminderDate > motExpiryDate) {
-                                  // Make the Change Date button pulse for MOT reminder
-                                  document.getElementById("changeMotDateBtn").classList.add("pulse");
+                              if (motReminderDate && motExpiryDate) {
+                                  const daysBetween = Math.ceil((motExpiryDate - motReminderDate) / (1000 * 60 * 60 * 24));
+                                  
+                                  if (motReminderDate > motExpiryDate) {
+                                      // Make the Change Date button pulse for MOT reminder
+                                      document.getElementById("changeMotDateBtn").classList.add("pulse");
 
-                                  // Add a note about the reminder and MOT expiry date issue
-                                  const note = document.createElement("p");
-                                  note.style.color = "red"; // Make the note stand out
-                                  note.innerText = "Your MOT reminder date should not be after the MOT expiry date.";
-                                  document.querySelector(".container").appendChild(note);
+                                      // Add a note about the reminder and MOT expiry date issue
+                                      const note = document.createElement("p");
+                                      note.style.color = "red"; // Make the note stand out
+                                      note.innerText = "Your MOT reminder date should not be after the MOT expiry date.";
+                                      document.querySelector(".container").appendChild(note);
+                                  } else if (daysBetween < 30) {
+                                      // Warning if reminder is less than 30 days before expiry
+                                      const note = document.createElement("p");
+                                      note.style.color = "orange"; // Make the note stand out
+                                      note.innerText = `Warning: Your MOT reminder is only ${daysBetween} days before expiry. Consider setting it earlier.`;
+                                      document.querySelector(".container").appendChild(note);
+                                  }
                               }
 
                               if (taxReminderDate && taxDueDate && taxReminderDate > taxDueDate) {
@@ -156,11 +254,33 @@
                   const taxDueDate = new Date(taxDueDateText);
                   if (taxDueDateText !== "no due date" && new Date(taxReminderDateInput) < taxDueDate) {
                       const taxReminderDate = new Date(taxReminderDateInput);
+                      const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
                       const reminderRef = doc(db, "reminders", user.uid);
 
                       try {
+                          // Get current document to preserve existing vehicle data
+                          const docSnap = await getDoc(reminderRef);
+                          let vehicles = {};
+                          
+                          if (docSnap.exists()) {
+                              const data = docSnap.data();
+                              vehicles = data.vehicles || {};
+                          }
+                          
+                          // Update or create the vehicle entry
+                          if (!vehicles[selectedVehicle]) {
+                              vehicles[selectedVehicle] = {};
+                          }
+                          
+                          vehicles[selectedVehicle] = {
+                              ...vehicles[selectedVehicle],
+                              taxReminderDate: taxReminderDate.toISOString()
+                          };
+                          
                           await setDoc(reminderRef, {
-                              taxReminderDate: taxReminderDate.toISOString() // Save as ISO string
+                              email: user.email,
+                              userID: user.uid,
+                              vehicles: vehicles
                           }, { merge: true });
 
                           alert("Your Tax reminder has been set.");

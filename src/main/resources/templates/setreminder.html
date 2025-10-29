@@ -35,9 +35,16 @@
   <div th:replace="~{navbar :: common-navbar}"></div>
   <div class="centered-container">
       
+      <!-- Vehicle Selection -->
+      <div class="form-container text-center mb-4">
+          <h1 class="h3 mb-3 font-weight-normal">Set Vehicle Reminders</h1>
+          <p class="text-muted">Vehicle: <span id="selectedVehicleDisplay">Loading...</span></p>
+          <a href="/vehicles" class="btn btn-outline-secondary btn-sm">← Back to Vehicles</a>
+      </div>
+      
       <!-- Set MOT Reminder Form -->
       <div class="form-container">
-          <h1 class="h3 mb-3 font-weight-normal">Set MOT Reminder</h1>
+          <h2 class="h4 mb-3 font-weight-normal">Set MOT Reminder</h2>
           <form id="motReminderForm" action="/setdate" method="post">
               <div class="form-group mb-3">
                   <label for="motEarliestDate">Earliest Booking Date</label>
@@ -56,7 +63,7 @@
       
       <!-- Set Tax Reminder Form -->
       <div class="form-container">
-          <h1 class="h3 mb-3 font-weight-normal">Set Tax Reminder</h1>
+          <h2 class="h4 mb-3 font-weight-normal">Set Tax Reminder</h2>
           <form id="taxReminderForm" action="/setdate" method="post">
               <div class="form-group mb-3">
                   <label for="taxEarliestDate">Earliest Reminder Date</label>
@@ -80,20 +87,90 @@
 </script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Get the selected vehicle
+    var selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
+    
+    if (!selectedVehicle) {
+      alert("No vehicle selected. Please select a vehicle first.");
+      window.location.href = "/vehicles";
+      return;
+    }
+    
+    document.getElementById("selectedVehicleDisplay").textContent = selectedVehicle;
+    
     // Set initial dates
     var motStoredDate = localStorage.getItem("motReminderDate");
     var taxStoredDate = localStorage.getItem("taxReminderDate");
-
-    if (motStoredDate) {
-      document.getElementById("motEarliestDate").value = motStoredDate;
-    } else {
-      document.getElementById("motEarliestDate").value = new Date().toISOString().split('T')[0];
+    var motExpiryDate = localStorage.getItem("motDate");
+    var taxDueDate = localStorage.getItem("taxDate");
+    
+    // Try to get data from currentVehicleData if direct values aren't available
+    const localVehicleData = localStorage.getItem('currentVehicleData');
+    if (localVehicleData && (!motExpiryDate || !taxDueDate)) {
+      try {
+        const vehicleData = JSON.parse(localVehicleData);
+        if (!motExpiryDate && vehicleData.motExpiryDate) {
+          motExpiryDate = vehicleData.motExpiryDate;
+        }
+        if (!taxDueDate && vehicleData.taxDueDate) {
+          taxDueDate = vehicleData.taxDueDate;
+        }
+        console.log("Using vehicle data from localStorage:", vehicleData);
+      } catch (error) {
+        console.error("Error parsing currentVehicleData:", error);
+      }
     }
 
-    if (taxStoredDate) {
-      document.getElementById("taxEarliestDate").value = taxStoredDate;
+    // Calculate MOT earliest booking date (3 months before MOT expiry)
+    if (motExpiryDate && motExpiryDate !== 'null' && motExpiryDate !== 'undefined') {
+      try {
+        const motExpiry = new Date(motExpiryDate);
+        const motEarliestBooking = new Date(motExpiry);
+        motEarliestBooking.setMonth(motEarliestBooking.getMonth() - 3);
+        
+        document.getElementById("motEarliestDate").value = motEarliestBooking.toISOString().split('T')[0];
+        
+        // If there's a stored reminder date, use it for the custom date field
+        if (motStoredDate) {
+          document.getElementById("motCustomDate").value = motStoredDate;
+        }
+      } catch (error) {
+        console.error("Error parsing MOT expiry date:", error);
+        document.getElementById("motEarliestDate").value = new Date().toISOString().split('T')[0];
+      }
     } else {
-      document.getElementById("taxEarliestDate").value = new Date().toISOString().split('T')[0];
+      // Fallback to stored date or today's date
+      if (motStoredDate) {
+        document.getElementById("motEarliestDate").value = motStoredDate;
+      } else {
+        document.getElementById("motEarliestDate").value = new Date().toISOString().split('T')[0];
+      }
+    }
+
+    // Calculate Tax earliest reminder date (1 month before Tax due date)
+    if (taxDueDate && taxDueDate !== 'null' && taxDueDate !== 'undefined') {
+      try {
+        const taxDue = new Date(taxDueDate);
+        const taxEarliestReminder = new Date(taxDue);
+        taxEarliestReminder.setMonth(taxEarliestReminder.getMonth() - 1);
+        
+        document.getElementById("taxEarliestDate").value = taxEarliestReminder.toISOString().split('T')[0];
+        
+        // If there's a stored reminder date, use it for the custom date field
+        if (taxStoredDate) {
+          document.getElementById("taxCustomDate").value = taxStoredDate;
+        }
+      } catch (error) {
+        console.error("Error parsing Tax due date:", error);
+        document.getElementById("taxEarliestDate").value = new Date().toISOString().split('T')[0];
+      }
+    } else {
+      // Fallback to stored date or today's date
+      if (taxStoredDate) {
+        document.getElementById("taxEarliestDate").value = taxStoredDate;
+      } else {
+        document.getElementById("taxEarliestDate").value = new Date().toISOString().split('T')[0];
+      }
     }
 
     // Set MOT reminder
@@ -129,7 +206,7 @@
 </script>
 <script type="module">
   import { auth, db } from '/js/firebase-init.js'; 
-  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
   document.addEventListener("DOMContentLoaded", () => {
     const setMotReminderBtn = document.getElementById("setMotReminderBtn");
@@ -141,15 +218,39 @@
         if (user) {
           const customDate = document.getElementById("motCustomDate").value || document.getElementById("motEarliestDate").value;
           
+          const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
           const reminderRef = doc(db, "reminders", user.uid);
           const taxDate = localStorage.getItem('taxDate'); // Get the tax date from local storage
+          const motDate = localStorage.getItem('motDate'); // Get the MOT expiry date from local storage
           
           try {
+            // Get current document to preserve existing vehicle data
+            const docSnap = await getDoc(reminderRef);
+            let vehicles = {};
+            
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              vehicles = data.vehicles || {};
+            }
+            
+            // Update or create the vehicle entry
+            if (!vehicles[selectedVehicle]) {
+              vehicles[selectedVehicle] = {};
+            }
+            
+            vehicles[selectedVehicle] = {
+              ...vehicles[selectedVehicle],
+              motReminderDate: customDate,
+              taxDueDate: taxDate,
+              motExpiryDate: motDate,
+              regNumber: selectedVehicle
+            };
+            
+            // Update the specific vehicle in the vehicles collection
             await setDoc(reminderRef, {
               email: user.email,
               userID: user.uid,
-              motReminderDate: customDate,
-              taxDueDate: taxDate // Add TaxDate to the Firebase document
+              vehicles: vehicles
             }, { merge: true });
 
             console.log("MOT Reminder set successfully.");
@@ -173,13 +274,37 @@
         if (user) {
           const customDate = document.getElementById("taxCustomDate").value || document.getElementById("taxEarliestDate").value;
           
+          const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
           const reminderRef = doc(db, "reminders", user.uid);
+          const motDate = localStorage.getItem('motDate'); // Get the MOT expiry date from local storage
           
           try {
+            // Get current document to preserve existing vehicle data
+            const docSnap = await getDoc(reminderRef);
+            let vehicles = {};
+            
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              vehicles = data.vehicles || {};
+            }
+            
+            // Update or create the vehicle entry
+            if (!vehicles[selectedVehicle]) {
+              vehicles[selectedVehicle] = {};
+            }
+            
+            vehicles[selectedVehicle] = {
+              ...vehicles[selectedVehicle],
+              taxReminderDate: customDate,
+              motExpiryDate: motDate,
+              regNumber: selectedVehicle
+            };
+            
+            // Update the specific vehicle in the vehicles collection
             await setDoc(reminderRef, {
               email: user.email,
               userID: user.uid,
-              taxReminderDate: customDate
+              vehicles: vehicles
             }, { merge: true });
 
             console.log("Tax Reminder set successfully.");

@@ -28,6 +28,14 @@
   <body>
     <div th:replace="~{navbar :: common-navbar}"></div>
     <div class="container my-5">
+      <!-- Navigation breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/vehicles">My Vehicles</a></li>
+          <li class="breadcrumb-item active" aria-current="page" th:text="${registrationNumber}">Vehicle Details</li>
+        </ol>
+      </nav>
+      
       <div class="row">
         <!-- Vehicle Details - Top Left -->
         <div class="col-md-4">
@@ -132,7 +140,6 @@
       </div>
     </div>
   </body>
-  <script src="/js/formatDateToDDMMYYYY.js"></script>
   <script type="module" src="/js/firebase-init.js"></script>
   <script type="module">
     import { auth } from '/js/firebase-init.js'
@@ -142,6 +149,11 @@
     function handleSetReminderClick() {
       onAuthStateChanged(auth, (user) => {
         if (user) {
+          // Store the current vehicle registration for reminder setting
+          const regNumber = document.querySelector('[th\\:text="${registrationNumber}"]')?.textContent;
+          if (regNumber) {
+            localStorage.setItem('selectedVehicleForReminder', regNumber);
+          }
           window.location.href = '/setreminder'
         } else {
           window.location.href = '/login?redirect=set-reminder'
@@ -162,6 +174,37 @@
     adjustLoginLogoutLink()
   </script>
 
+  <script type="module">
+    import { auth, db } from '/js/firebase-init.js';
+    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // Auto-save vehicle data to Firebase when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          const vehicleDataString = localStorage.getItem('currentVehicleData');
+          if (vehicleDataString) {
+            try {
+              const vehicleData = JSON.parse(vehicleDataString);
+              const userDocRef = doc(db, "reminders", user.uid);
+              
+              // Save vehicle to the multi-vehicle structure
+              await setDoc(userDocRef, {
+                email: user.email,
+                userID: user.uid,
+                [`vehicles.${vehicleData.regNumber}`]: vehicleData
+              }, { merge: true });
+              
+              console.log(`Vehicle ${vehicleData.regNumber} saved to Firebase`);
+            } catch (error) {
+              console.error("Error saving vehicle to Firebase:", error);
+            }
+          }
+        }
+      });
+    });
+  </script>
+
   <script th:inline="javascript">
     /*<![CDATA[*/
     var reminderDate = /*[[${reminderDate}]]*/ 'defaultDate'
@@ -176,6 +219,23 @@
 
     var regNumber = /*[[${registrationNumber}]]*/
     localStorage.setItem('regNumber', regNumber.toString())
+    localStorage.setItem('selectedVehicleForReminder', regNumber.toString())
+    
+    // Store complete vehicle data for the multi-vehicle system
+    var vehicleData = {
+      regNumber: regNumber.toString(),
+      motExpiryDate: motDate.toString(),
+      taxDueDate: taxDate.toString(),
+      make: /*[[${carMake}]]*/ 'Unknown',
+      colour: /*[[${carColour}]]*/ 'Unknown',
+      year: /*[[${carYear}]]*/ 'Unknown',
+      fuel: /*[[${carFuel}]]*/ 'Unknown',
+      engineSize: /*[[${carEngineSize}]]*/ 'Unknown',
+      motStatus: /*[[${motStatus}]]*/ 'Unknown'
+    };
+    
+    // Store vehicle data for immediate use
+    localStorage.setItem('currentVehicleData', JSON.stringify(vehicleData));
     /*]]>*/
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
