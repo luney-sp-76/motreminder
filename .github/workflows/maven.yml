@@ -9,8 +9,10 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -27,96 +29,77 @@ jobs:
         name: rest-service-jar
         path: target/rest-service-0.0.2-SNAPSHOT.jar
 
-  download-and-deploy:
+  deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+
     steps:
-    - name: Get Most Recent Artifact ID
-      id: fetch-artifact-id
+    - name: Debug TTY and Shell
       run: |
-        ARTIFACTS_JSON=$(curl -s -L \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ secrets.HUB_TOKEN }}" \
-          -H "X-GitHub-Api-Version: 2022-11-28" \
-          "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
-        ARTIFACT_ID=$(echo "$ARTIFACTS_JSON" | jq -r '[.artifacts[] | select(.expired == false)] | sort_by(.created_at) | last | .id')
-        echo "artifact_id=$ARTIFACT_ID" >> $GITHUB_ENV
-        echo "artifact_id=$ARTIFACT_ID" >> $GITHUB_OUTPUT
-
-    - name: Deploy to VPS
-      uses: appleboy/ssh-action@v0.1.4
+        echo "whoami: $(whoami)"
+        echo "tty: $(tty || echo 'no tty')"
+        echo "SHELL: $SHELL"
+        sudo -l
+    - name: Who am I?
+      run: |
+        echo "Running as: $(whoami)"
+        id
+    - name: Force bash and print shell info
+      run: |
+        echo "Shell: $SHELL"
+        bash -c 'echo Bash inside shell: $SHELL'
+        sudo -n whoami
+      shell: bash
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 22
-        script: |
-          if [[ -z "${{ steps.fetch-artifact-id.outputs.artifact_id }}" ]]; then
-            echo "Error: No valid artifact ID found."
-            exit 1
-          fi
-          ARTIFACT_URL="https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${{ steps.fetch-artifact-id.outputs.artifact_id }}/zip"
-          echo "Downloading artifact from: $ARTIFACT_URL"
-          curl -L -o latest_artifact.zip \
-            -H "Authorization: Bearer ${{ secrets.HUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "$ARTIFACT_URL"
-          unzip -o latest_artifact.zip -d ./extracted
-          sudo mv ./extracted/* /home/paulolphert/motbookingreminder/
-          rm -f latest_artifact.zip
-          rm -rf ./extracted
-          echo "Deployment completed successfully."
-          
-          echo "Starting Green Service..."
-          /home/paulolphert/update_port.sh 8081
-          sudo systemctl daemon-reload
-          sudo systemctl restart motbookingreminder2.service
-          sleep 5
-          
-          echo "Updating Nginx Configuration..."
-          export SERVICE_PORT=8081  # Set to 8081 for green deployment
-          envsubst '$SERVICE_PORT' < /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
-          sudo systemctl daemon-reload
-          sudo nginx -s reload
-          sleep 10
+        name: rest-service-jar
 
-          echo "Performing Health Check..."
-          max_attempts=5
-          attempt=1
-          while [ $attempt -le $max_attempts ]; do
-            STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://motbookingreminder.co.uk)
-            if [ "$STATUS" -eq 200 ]; then
-              echo "Health check successful."
-              echo "Updating Blue service with the latest artifact as backup..."
-              sudo cp /home/paulolphert/motbookingreminder/rest-service-0.0.2-SNAPSHOT.jar /home/paulolphert/motbookingreminder/rest-service-0.0.1-SNAPSHOT.jar
-              echo "Blue service backup updated successfully but not started."
-              break
-            else
-              echo "Health check attempt $attempt failed with status $STATUS."
-              if [ $attempt -eq $max_attempts ]; then
-                echo "Health check failed after $max_attempts attempts. Reverting to Blue environment..."
-                echo "Stopping Green service..."
-                sudo systemctl stop motbookingreminder2.service
-                /home/paulolphert/update_port.sh 8082
-                export SERVICE_PORT=8082  # Revert to 8082 for blue deployment
-                envsubst '$SERVICE_PORT' < /etc/nginx/conf.d/motbookingreminder.conf.template > /etc/nginx/conf.d/motbookingreminder.conf
-                sudo systemctl daemon-reload
-                sudo nginx -s reload
-                echo "Restarting Blue Service..."
-                sudo systemctl restart motbookingreminder.service
-                sleep 5
-                echo "Job failed - reverted to port 8082 and Blue service."
-                exit 1
-              fi
-              sleep 10
-              attempt=$((attempt + 1))
+    - name: Deploy Green Instance (8081)
+      run: |
+        echo "Copying artifact to deployment path..."
+        mkdir -p /home/paul/motbookingreminder
+        cp rest-service-0.0.2-SNAPSHOT.jar /home/paul/motbookingreminder/
+
+        echo "Switching to Green Service (8081)..."
+        /home/paul/update_port.sh 8081
+        sudo -n /usr/bin/systemctl daemon-reload
+        sudo -n /usr/bin/systemctl restart motbookingreminder2.service
+        sleep 5
+
+        echo "Updating Nginx Configuration..."
+        export SERVICE_PORT=8081
+        envsubst '$SERVICE_PORT' < /home/paul/motbookingreminder/motbookingreminder.conf.template  | sudo tee /etc/nginx/conf.d/motbookingreminder.conf > /dev/null
+        sudo -n /usr/sbin/nginx -s reload
+        sleep 10
+
+        echo "Performing Health Check..."
+        max_attempts=5
+        attempt=1
+        while [ $attempt -le $max_attempts ]; do
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080)
+          if [ "$STATUS" -eq 200 ]; then
+            echo "Health check successful."
+
+            echo "Updating Blue backup JAR..."
+            cp /home/paul/motbookingreminder/rest-service-0.0.2-SNAPSHOT.jar /home/paul/motbookingreminder/rest-service-0.0.1-SNAPSHOT.jar
+            break
+          else
+            echo "Health check failed (attempt $attempt, status $STATUS)."
+            if [ $attempt -eq $max_attempts ]; then
+              echo "Health check failed after $max_attempts attempts. Reverting to Blue (8082)..."
+              sudo -n /usr/bin/systemctl stop motbookingreminder2.service
+              /home/paul/update_port.sh 8082
+              export SERVICE_PORT=8082
+              envsubst '$SERVICE_PORT' < /home/paul/motbookingreminder/motbookingreminder.conf.template | sudo tee /etc/nginx/conf.d/motbookingreminder.conf > /dev/null
+              sudo -n /usr/sbin/nginx -s reload
+              sudo systemctl restart motbookingreminder.service
+              echo "Reverted to Blue."
+              exit 1
             fi
-          done
-          echo "Green deployment successful and verified!"
+            attempt=$((attempt + 1))
+            sleep 10
+          fi
+        done
 
-
-  
-
-          
-
+        echo "Green deployment successful!"
