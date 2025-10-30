@@ -99,23 +99,37 @@
     document.getElementById("selectedVehicleDisplay").textContent = selectedVehicle;
     
     // Set initial dates
-    var motStoredDate = localStorage.getItem("motReminderDate");
-    var taxStoredDate = localStorage.getItem("taxReminderDate");
-    var motExpiryDate = localStorage.getItem("motDate");
-    var taxDueDate = localStorage.getItem("taxDate");
+    // Use vehicle-specific localStorage keys
+    var motStoredDate = localStorage.getItem(`${selectedVehicle}_motReminderDate`);
+    var taxStoredDate = localStorage.getItem(`${selectedVehicle}_taxReminderDate`);
+    var motExpiryDate = localStorage.getItem(`${selectedVehicle}_motDate`);
+    var taxDueDate = localStorage.getItem(`${selectedVehicle}_taxDate`);
     
-    // Try to get data from currentVehicleData if direct values aren't available
-    const localVehicleData = localStorage.getItem('currentVehicleData');
+    // Fallback to generic keys for backward compatibility
+    if (!motExpiryDate) motExpiryDate = localStorage.getItem("motDate");
+    if (!taxDueDate) taxDueDate = localStorage.getItem("taxDate");
+    
+    // Try to get data from vehicle-specific storage first, then fallback to generic
+    let localVehicleData = localStorage.getItem(`${selectedVehicle}_vehicleData`);
+    if (!localVehicleData) {
+      localVehicleData = localStorage.getItem('currentVehicleData');
+    }
+    
     if (localVehicleData && (!motExpiryDate || !taxDueDate)) {
       try {
         const vehicleData = JSON.parse(localVehicleData);
-        if (!motExpiryDate && vehicleData.motExpiryDate) {
-          motExpiryDate = vehicleData.motExpiryDate;
+        // Only use vehicle data if it's for the currently selected vehicle or if regNumber matches
+        if (!vehicleData.regNumber || vehicleData.regNumber === selectedVehicle) {
+          if (!motExpiryDate && vehicleData.motExpiryDate) {
+            motExpiryDate = vehicleData.motExpiryDate;
+          }
+          if (!taxDueDate && vehicleData.taxDueDate) {
+            taxDueDate = vehicleData.taxDueDate;
+          }
+          console.log("Using vehicle data from localStorage:", vehicleData);
+        } else {
+          console.log("Ignoring localStorage vehicle data - vehicle mismatch");
         }
-        if (!taxDueDate && vehicleData.taxDueDate) {
-          taxDueDate = vehicleData.taxDueDate;
-        }
-        console.log("Using vehicle data from localStorage:", vehicleData);
       } catch (error) {
         console.error("Error parsing currentVehicleData:", error);
       }
@@ -253,6 +267,9 @@
               vehicles: vehicles
             }, { merge: true });
 
+            // Store the reminder date for this specific vehicle
+            localStorage.setItem(`${selectedVehicle}_motReminderDate`, customDate);
+            
             console.log("MOT Reminder set successfully.");
             alert("Your MOT reminder has been set.");
             window.location.href = "/setdate";
@@ -307,6 +324,9 @@
               vehicles: vehicles
             }, { merge: true });
 
+            // Store the reminder date for this specific vehicle
+            localStorage.setItem(`${selectedVehicle}_taxReminderDate`, customDate);
+            
             console.log("Tax Reminder set successfully.");
             alert("Your Tax reminder has been set.");
             window.location.href = "/setdate";

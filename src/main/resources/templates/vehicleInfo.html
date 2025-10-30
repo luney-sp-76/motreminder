@@ -8,6 +8,8 @@
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Include Bootstrap JavaScript and its dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
@@ -22,6 +24,64 @@
       }
       .green-link {
         color: #28a745; /* Bootstrap's success green */
+      }
+      
+      /* Reminder card styling to match existing vehicle cards */
+      .mot-reminder-card {
+        background-color: #e3f2fd; /* Light blue background like vehicle details */
+        border: 1px solid #bbdefb;
+        transition: all 0.2s ease;
+      }
+      
+      .tax-reminder-card {
+        background-color: #e8f5e9; /* Pale green background like MOT/Tax cards */
+        border: 1px solid #c8e6c9;
+        transition: all 0.2s ease;
+      }
+      
+      /* Status-based styling */
+      .reminder-active {
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+        border-color: #28a745 !important;
+      }
+      
+      .reminder-pending {
+        box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
+        border-color: #ffc107 !important;
+      }
+      
+      .reminder-overdue {
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+        border-color: #dc3545 !important;
+      }
+      
+      .reminder-date {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #495057;
+        margin-bottom: 0.5rem;
+      }
+      
+      .reminder-status {
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      
+      .reminder-not-set {
+        color: #6c757d;
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      /* Hover effects to match other cards */
+      .mot-reminder-card:hover,
+      .tax-reminder-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       }
     </style>
   </head>
@@ -104,36 +164,65 @@
         </div>
       </div>
 
-      <!-- Placeholder Message, Bottom Center MoT Reminder Date Passed from VehicleController -->
+      <!-- Reminder Information Section -->
+      <div class="row mt-4">
+        <!-- MOT Reminder Card -->
+        <div class="col-md-6 mb-3">
+          <div class="card mot-reminder-card">
+            <div class="card-header">MOT Reminder Status</div>
+            <div class="card-body">
+              <div id="motReminderInfo">
+                <p class="text-muted mb-1">
+                  <small>Loading reminder information...</small>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tax Reminder Card -->
+        <div class="col-md-6 mb-3">
+          <div class="card tax-reminder-card">
+            <div class="card-header">Tax Reminder Status</div>
+            <div class="card-body">
+              <div id="taxReminderInfo">
+                <p class="text-muted mb-1">
+                  <small>Loading reminder information...</small>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Reminder Action Button Row -->
       <div class="row justify-content-center">
-        <div class="col-md-12 text-center mt-4">
+        <div class="col-md-12 text-center mb-4">
+          <button
+            id="reminderActionButton"
+            class="btn btn-success btn-lg"
+            onclick="handleSetReminderClick()"
+          >
+            <i class="fas fa-bell"></i> Set Reminders
+          </button>
+        </div>
+      </div>
+
+      <!-- Original Placeholder Message for MOT Status -->
+      <div class="row justify-content-center mt-3">
+        <div class="col-md-12 text-center">
           <div th:if="${placeholderMessage}">
-            <p
-              th:text="${placeholderMessage}"
-              class="alert alert-info"
-              role="alert"
-            ></p>
             <div th:switch="${placeholderMessage}">
               <a
                 th:case="'Book your MOT today'"
                 href="https://www.gov.uk/getting-an-mot/booking-an-mot"
                 class="btn btn-warning btn-lg"
               >
-                Book Now
+                <i class="fas fa-external-link-alt"></i> Book MOT Now
               </a>
-              <a th:case="'Set a Reminder'"
-                href="javascript:void(0)"
-                onclick="handleSetReminderClick()"
-                class="btn btn-success btn-lg"
-                id="setReminderButton"
-              >
-                Set Reminder
-              </a>
-              >
-              <!-- Default action if none of the above messages match -->
-              <a th:case="*" href="/index" class="btn btn-secondary btn-lg">
-                Home
-              </a>
+              <div th:case="*">
+                <!-- Other cases handled by reminder section above -->
+              </div>
             </div>
           </div>
         </div>
@@ -178,7 +267,7 @@
     import { auth, db } from '/js/firebase-init.js';
     import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // Auto-save vehicle data to Firebase when page loads
+    // Auto-save vehicle data and load reminder information
     document.addEventListener('DOMContentLoaded', () => {
       auth.onAuthStateChanged(async (user) => {
         if (user) {
@@ -196,13 +285,202 @@
               }, { merge: true });
               
               console.log(`Vehicle ${vehicleData.regNumber} saved to Firebase`);
+              
+              // Load reminder information after saving
+              await loadReminderInformation(user, vehicleData.regNumber);
+              
             } catch (error) {
               console.error("Error saving vehicle to Firebase:", error);
+            }
+          } else {
+            // Try to get vehicle info from URL or localStorage
+            const currentVehicle = getCurrentVehicleFromContext();
+            if (currentVehicle) {
+              await loadReminderInformation(user, currentVehicle);
             }
           }
         }
       });
     });
+
+    function getCurrentVehicleFromContext() {
+      // Try to get vehicle from localStorage first
+      let vehicle = localStorage.getItem('selectedVehicleForReminder') || localStorage.getItem('regNumber');
+      
+      // If not found, try to extract from URL path
+      if (!vehicle) {
+        const pathParts = window.location.pathname.split('/');
+        if (pathParts[1] === 'vehicle' && pathParts[2]) {
+          vehicle = pathParts[2];
+        }
+      }
+      
+      // If still not found, try to extract from breadcrumb or page context
+      if (!vehicle) {
+        const breadcrumb = document.querySelector('.breadcrumb-item.active');
+        if (breadcrumb) {
+          vehicle = breadcrumb.textContent.trim();
+        }
+      }
+      
+      // As last resort, try to get from the registration number display on page
+      if (!vehicle) {
+        const regElement = document.querySelector('[th\\:text="${registrationNumber}"]');
+        if (regElement && regElement.textContent) {
+          vehicle = regElement.textContent.trim();
+        }
+      }
+      
+      return vehicle;
+    }
+
+    async function loadReminderInformation(user, vehicleRegNumber) {
+      try {
+        const userDocRef = doc(db, "reminders", user.uid);
+        const docSnap = await getDoc(userDocRef);
+        
+        let motReminderDate = null;
+        let taxReminderDate = null;
+        let motExpiryDate = null;
+        let taxDueDate = null;
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          
+          // Check multi-vehicle structure first
+          if (data.vehicles && data.vehicles[vehicleRegNumber]) {
+            const vehicleData = data.vehicles[vehicleRegNumber];
+            motReminderDate = vehicleData.motReminderDate ? new Date(vehicleData.motReminderDate) : null;
+            taxReminderDate = vehicleData.taxReminderDate ? new Date(vehicleData.taxReminderDate) : null;
+            motExpiryDate = vehicleData.motExpiryDate ? new Date(vehicleData.motExpiryDate) : null;
+            taxDueDate = vehicleData.taxDueDate ? new Date(vehicleData.taxDueDate) : null;
+          } else if (data.regNumber === vehicleRegNumber) {
+            // Legacy single vehicle structure
+            motReminderDate = data.motReminderDate ? new Date(data.motReminderDate) : null;
+            taxReminderDate = data.taxReminderDate ? new Date(data.taxReminderDate) : null;
+            motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null;
+            taxDueDate = data.taxDueDate ? new Date(data.taxDueDate) : null;
+          }
+        }
+        
+        updateReminderDisplay(motReminderDate, taxReminderDate, motExpiryDate, taxDueDate);
+        updateReminderButton(motReminderDate, taxReminderDate);
+        
+      } catch (error) {
+        console.error("Error loading reminder information:", error);
+        displayReminderError();
+      }
+    }
+
+    function updateReminderDisplay(motReminderDate, taxReminderDate, motExpiryDate, taxDueDate) {
+      const motReminderInfo = document.getElementById('motReminderInfo');
+      const taxReminderInfo = document.getElementById('taxReminderInfo');
+      const motCard = document.querySelector('.mot-reminder-card');
+      const taxCard = document.querySelector('.tax-reminder-card');
+      
+      // Update MOT Reminder Info
+      if (motReminderDate) {
+        const motDaysUntil = Math.ceil((motReminderDate - new Date()) / (1000 * 60 * 60 * 24));
+        const motStatus = getRemainderStatus(motDaysUntil);
+        
+        motReminderInfo.innerHTML = `
+          <div class="reminder-date">${formatDateToDDMMMYYYY(motReminderDate)}</div>
+          <div class="reminder-status text-${motStatus.color}">
+            <i class="fas fa-${motStatus.icon}"></i>
+            <span>${motStatus.text}</span>
+          </div>
+        `;
+        
+        // Add status-based styling to the card
+        motCard.className = `card mot-reminder-card reminder-${motStatus.class}`;
+      } else {
+        motReminderInfo.innerHTML = `
+          <div class="reminder-not-set">
+            <i class="fas fa-calendar-plus"></i>
+            <span>No reminder set</span>
+          </div>
+        `;
+        motCard.className = 'card mot-reminder-card';
+      }
+      
+      // Update Tax Reminder Info
+      if (taxReminderDate) {
+        const taxDaysUntil = Math.ceil((taxReminderDate - new Date()) / (1000 * 60 * 60 * 24));
+        const taxStatus = getRemainderStatus(taxDaysUntil);
+        
+        taxReminderInfo.innerHTML = `
+          <div class="reminder-date">${formatDateToDDMMMYYYY(taxReminderDate)}</div>
+          <div class="reminder-status text-${taxStatus.color}">
+            <i class="fas fa-${taxStatus.icon}"></i>
+            <span>${taxStatus.text}</span>
+          </div>
+        `;
+        
+        // Add status-based styling to the card
+        taxCard.className = `card tax-reminder-card reminder-${taxStatus.class}`;
+      } else {
+        taxReminderInfo.innerHTML = `
+          <div class="reminder-not-set">
+            <i class="fas fa-calendar-plus"></i>
+            <span>No reminder set</span>
+          </div>
+        `;
+        taxCard.className = 'card tax-reminder-card';
+      }
+    }
+
+    function getRemainderStatus(daysUntil) {
+      if (daysUntil < 0) {
+        return {
+          text: `${Math.abs(daysUntil)} days overdue`,
+          color: 'danger',
+          icon: 'exclamation-triangle',
+          class: 'overdue'
+        };
+      } else if (daysUntil <= 3) {
+        return {
+          text: `${daysUntil} days remaining`,
+          color: 'warning',
+          icon: 'clock',
+          class: 'pending'
+        };
+      } else {
+        return {
+          text: `${daysUntil} days remaining`,
+          color: 'success',
+          icon: 'check-circle',
+          class: 'active'
+        };
+      }
+    }
+
+    function updateReminderButton(motReminderDate, taxReminderDate) {
+      const button = document.getElementById('reminderActionButton');
+      const hasReminders = motReminderDate || taxReminderDate;
+      
+      if (hasReminders) {
+        button.innerHTML = '<i class="fas fa-edit"></i> Update Reminders';
+        button.className = 'btn btn-primary btn-lg';
+      } else {
+        button.innerHTML = '<i class="fas fa-bell"></i> Set Reminders';
+        button.className = 'btn btn-success btn-lg';
+      }
+    }
+
+    function displayReminderError() {
+      document.getElementById('motReminderInfo').innerHTML = 
+        '<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading reminder</p>';
+      document.getElementById('taxReminderInfo').innerHTML = 
+        '<p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading reminder</p>';
+    }
+
+    function formatDateToDDMMMYYYY(date) {
+      return new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }).format(date);
+    }
   </script>
 
   <script th:inline="javascript">
@@ -211,15 +489,25 @@
     if (reminderDate !== 'defaultDate') {
       localStorage.setItem('reminderDate', reminderDate.toString())
     }
-    var motDate = /*[[${motDate}]]*/
-    localStorage.setItem('motDate', motDate.toString())
-
-    var taxDate = /*[[${taxDate}]]*/
-    localStorage.setItem('taxDate', taxDate.toString())
-
-    var regNumber = /*[[${registrationNumber}]]*/
-    localStorage.setItem('regNumber', regNumber.toString())
-    localStorage.setItem('selectedVehicleForReminder', regNumber.toString())
+    var motDate = /*[[${motDate}]]*/ 'defaultMotDate';
+    var taxDate = /*[[${taxDate}]]*/ 'defaultTaxDate';
+    var regNumber = /*[[${registrationNumber}]]*/ 'defaultRegNumber';
+    
+    // Store vehicle-specific data
+    if (motDate !== 'defaultMotDate') {
+      localStorage.setItem(`${regNumber}_motDate`, motDate.toString());
+      localStorage.setItem('motDate', motDate.toString()); // backward compatibility
+    }
+    
+    if (taxDate !== 'defaultTaxDate') {
+      localStorage.setItem(`${regNumber}_taxDate`, taxDate.toString());
+      localStorage.setItem('taxDate', taxDate.toString()); // backward compatibility
+    }
+    
+    if (regNumber !== 'defaultRegNumber') {
+      localStorage.setItem('selectedVehicleForReminder', regNumber.toString());
+      localStorage.setItem('regNumber', regNumber.toString()); // backward compatibility
+    }
     
     // Store complete vehicle data for the multi-vehicle system
     var vehicleData = {
@@ -234,8 +522,9 @@
       motStatus: /*[[${motStatus}]]*/ 'Unknown'
     };
     
-    // Store vehicle data for immediate use
-    localStorage.setItem('currentVehicleData', JSON.stringify(vehicleData));
+    // Store vehicle data for immediate use (vehicle-specific)
+    localStorage.setItem(`${regNumber}_vehicleData`, JSON.stringify(vehicleData));
+    localStorage.setItem('currentVehicleData', JSON.stringify(vehicleData)); // backward compatibility
     /*]]>*/
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

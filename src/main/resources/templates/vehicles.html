@@ -287,14 +287,30 @@
         }
 
         window.addNewVehicle = function() {
+            // Clear old vehicle data before adding new vehicle
+            clearOldVehicleData();
+            localStorage.removeItem('selectedVehicleForReminder');
             window.location.href = '/';
         };
 
         window.viewVehicle = function(regNumber) {
+            // Clear old generic localStorage data to prevent cross-vehicle contamination
+            clearOldVehicleData();
+            
             // Store selected vehicle and redirect to vehicle info
             localStorage.setItem('selectedVehicle', regNumber);
+            localStorage.setItem('selectedVehicleForReminder', regNumber);
             window.location.href = `/vehicle/${regNumber}`;
         };
+
+        function clearOldVehicleData() {
+            // Clear generic localStorage keys that might interfere
+            localStorage.removeItem('motDate');
+            localStorage.removeItem('taxDate');
+            localStorage.removeItem('motReminderDate');
+            localStorage.removeItem('taxReminderDate');
+            localStorage.removeItem('currentVehicleData');
+        }
 
         window.editVehicle = function(regNumber) {
             // Redirect to edit vehicle page
