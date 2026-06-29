@@ -1,0 +1,3 @@
+motreminder.turtlecastle.uk {
+	reverse_proxy localhost:8082
+}
