@@ -23,3 +23,15 @@ Firestore has been initialized
 2026-07-13T14:49:45.263+01:00  INFO 88002 --- [omcat-handler-0] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
 2026-07-13T14:49:45.267+01:00  INFO 88002 --- [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2026-07-13T14:49:45.270+01:00  INFO 88002 --- [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-07-13T17:19:15.839+01:00  INFO 88002 --- [mcat-handler-92] o.apache.coyote.http11.Http11Processor   : Error parsing HTTP request header
+ Note: further occurrences of HTTP request parsing errors will be logged at DEBUG level.
+
+java.lang.IllegalArgumentException: Invalid character found in method name [0x160x030x030x02a0x010x000x02]0x030x03q0xdc0xfb0xd20xbd0x8f00xdd0x0a0xf30xd30xfa0x8e70xf30xff0xb4zw0x1e0xf20xdd0xaf0xbb0xaa0xee0x810xc10x03m0xaaC ]. HTTP method names must be tokens
+	at org.apache.coyote.http11.Http11InputBuffer.parseRequestLine(Http11InputBuffer.java:402) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1797) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at java.base/java.lang.VirtualThread.run(VirtualThread.java:456) ~[na:na]
+
