@@ -121,8 +121,7 @@ document.getElementById('closeAccountBtn').addEventListener('click', () => {
 
 
 document.getElementById('gdprDataRequestBtn').addEventListener('click', () => {
-    const auth = getAuth();
-    const db = getFirestore();
+
 
     if (auth.currentUser) {
         const userId = auth.currentUser.uid;
