@@ -8,30 +8,18 @@
 
  :: Spring Boot ::               (v3.5.16)
 
-2026-07-13T14:48:55.700+01:00  INFO 88002 --- [           main] c.m.restservice.RestServiceApplication   : Starting RestServiceApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 88002 (/Users/paulolphert/git_repo/motreminder/target/rest-service-0.0.1-SNAPSHOT.jar started by paulolphert in /Users/paulolphert/git_repo/motreminder)
-2026-07-13T14:48:55.703+01:00 DEBUG 88002 --- [           main] c.m.restservice.RestServiceApplication   : Running with Spring Boot v3.5.16, Spring v6.2.19
-2026-07-13T14:48:55.703+01:00  INFO 88002 --- [           main] c.m.restservice.RestServiceApplication   : No active profile set, falling back to 1 default profile: "default"
-2026-07-13T14:48:56.939+01:00  INFO 88002 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
-2026-07-13T14:48:56.951+01:00  INFO 88002 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-07-13T14:48:56.951+01:00  INFO 88002 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
-2026-07-13T14:48:56.979+01:00  INFO 88002 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-07-13T14:48:56.979+01:00  INFO 88002 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1224 ms
+2026-07-13T19:59:46.323+01:00  INFO 19920 --- [           main] c.m.restservice.RestServiceApplication   : Starting RestServiceApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 19920 (/Users/paulolphert/git_repo/motreminder/target/rest-service-0.0.1-SNAPSHOT.jar started by paulolphert in /Users/paulolphert/git_repo/motreminder)
+2026-07-13T19:59:46.331+01:00 DEBUG 19920 --- [           main] c.m.restservice.RestServiceApplication   : Running with Spring Boot v3.5.16, Spring v6.2.19
+2026-07-13T19:59:46.333+01:00  INFO 19920 --- [           main] c.m.restservice.RestServiceApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-07-13T19:59:47.380+01:00  INFO 19920 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+2026-07-13T19:59:47.393+01:00  INFO 19920 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-13T19:59:47.394+01:00  INFO 19920 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
+2026-07-13T19:59:47.423+01:00  INFO 19920 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-07-13T19:59:47.424+01:00  INFO 19920 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1029 ms
 Firestore has been initialized
-2026-07-13T14:48:57.523+01:00  INFO 88002 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
-2026-07-13T14:48:57.750+01:00  INFO 88002 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
-2026-07-13T14:48:57.767+01:00  INFO 88002 --- [           main] c.m.restservice.RestServiceApplication   : Started RestServiceApplication in 2.454 seconds (process running for 2.816)
-2026-07-13T14:49:45.263+01:00  INFO 88002 --- [omcat-handler-0] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-07-13T14:49:45.267+01:00  INFO 88002 --- [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-07-13T14:49:45.270+01:00  INFO 88002 --- [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
-2026-07-13T17:19:15.839+01:00  INFO 88002 --- [mcat-handler-92] o.apache.coyote.http11.Http11Processor   : Error parsing HTTP request header
- Note: further occurrences of HTTP request parsing errors will be logged at DEBUG level.
-
-java.lang.IllegalArgumentException: Invalid character found in method name [0x160x030x030x02a0x010x000x02]0x030x03q0xdc0xfb0xd20xbd0x8f00xdd0x0a0xf30xd30xfa0x8e70xf30xff0xb4zw0x1e0xf20xdd0xaf0xbb0xaa0xee0x810xc10x03m0xaaC ]. HTTP method names must be tokens
-	at org.apache.coyote.http11.Http11InputBuffer.parseRequestLine(Http11InputBuffer.java:402) ~[tomcat-embed-core-10.1.55.jar!/:na]
-	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:272) ~[tomcat-embed-core-10.1.55.jar!/:na]
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.55.jar!/:na]
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272) ~[tomcat-embed-core-10.1.55.jar!/:na]
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1797) ~[tomcat-embed-core-10.1.55.jar!/:na]
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.55.jar!/:na]
-	at java.base/java.lang.VirtualThread.run(VirtualThread.java:456) ~[na:na]
-
+2026-07-13T19:59:47.899+01:00  INFO 19920 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-07-13T19:59:48.135+01:00  INFO 19920 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
+2026-07-13T19:59:48.152+01:00  INFO 19920 --- [           main] c.m.restservice.RestServiceApplication   : Started RestServiceApplication in 2.185 seconds (process running for 2.515)
+2026-07-13T20:00:47.238+01:00  INFO 19920 --- [omcat-handler-0] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-13T20:00:47.239+01:00  INFO 19920 --- [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-13T20:00:47.241+01:00  INFO 19920 --- [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
