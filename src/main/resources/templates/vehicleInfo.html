@@ -235,7 +235,7 @@
 
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js'
 
-    function handleSetReminderClick() {
+    window.handleSetReminderClick = function() {
       onAuthStateChanged(auth, (user) => {
         if (user) {
           // Store the current vehicle registration for reminder setting
