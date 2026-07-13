@@ -229,9 +229,9 @@
       </div>
     </div>
   </body>
-  <script type="module" src="/js/firebase-init.js"></script>
+  <script type="module" src="/js/firebase-init.js?v=2"></script>
   <script type="module">
-    import { auth } from '/js/firebase-init.js'
+    import { auth } from '/js/firebase-init.js?v=2'
 
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js'
 
@@ -264,7 +264,7 @@
   </script>
 
   <script type="module">
-    import { auth, db } from '/js/firebase-init.js';
+    import { auth, db } from '/js/firebase-init.js?v=2';
     import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     // Auto-save vehicle data and load reminder information
