@@ -116,8 +116,8 @@
     </script>
 
     <script type="module">
-        import { auth, db } from '/js/firebase-init.js?v=2';
-        import { doc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { auth } from '/js/firebase-init.js?v=2';
+        import { getReminders, setReminders, deleteVehicle as deleteVehicleAPI } from '/js/reminders-api.js';
         import { formatDateToDDMMMYYYY } from '/js/formatDateToDDMMYYYY.js';
 
         let currentUser = null;
@@ -140,13 +140,10 @@
             const vehiclesGrid = document.getElementById('vehiclesGrid');
             
             try {
-                const userDocRef = doc(db, "reminders", currentUser.uid);
-                const docSnap = await getDoc(userDocRef);
-                
+                const data = await getReminders();
                 vehiclesGrid.innerHTML = '';
                 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
+                if (data && Object.keys(data).length > 0) {
                     
                     if (data.vehicles && Object.keys(data.vehicles).length > 0) {
                         // New multi-vehicle structure
@@ -164,12 +161,8 @@
                             taxDueDate: data.taxDueDate
                         };
                         
-                        // Migrate to new structure
-                        await setDoc(userDocRef, {
-                            vehicles: {
-                                [data.regNumber]: vehicleData
-                            }
-                        }, { merge: true });
+                        // Migrate to new structure via backend API
+                        await setReminders({ vehicles: { [data.regNumber]: vehicleData } });
                         
                         createVehicleCard(data.regNumber, vehicleData);
                         loadingIndicator.style.display = 'none';
@@ -364,10 +357,7 @@
         document.getElementById('confirmDelete').addEventListener('click', async () => {
             if (vehicleToDelete) {
                 try {
-                    const userDocRef = doc(db, "reminders", currentUser.uid);
-                    await updateDoc(userDocRef, {
-                        [`vehicles.${vehicleToDelete}`]: deleteField()
-                    });
+                    await deleteVehicleAPI(vehicleToDelete);
                     hideDeleteModal();
                     loadVehicles();
                 } catch (error) {

@@ -63,8 +63,8 @@
     </script>
 
     <script type="module">
-      import { auth, db } from '/js/firebase-init.js?v=2';
-      import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { auth } from '/js/firebase-init.js?v=2';
+      import { getReminders, setReminders } from '/js/reminders-api.js';
       import { formatDateToDDMMMYYYY } from '/js/formatDateToDDMMYYYY.js';
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -85,14 +85,12 @@
                   if (localVehicleData) {
                       try {
                           const vehicleData = JSON.parse(localVehicleData);
-                          const userDocRef = doc(db, "reminders", user.uid);
-                          
-                          // Save vehicle to Firebase first
-                          await setDoc(userDocRef, {
+                          // Save vehicle via backend API first
+                          await setReminders({
                               email: user.email,
                               userID: user.uid,
                               [`vehicles.${vehicleData.regNumber}`]: vehicleData
-                          }, { merge: true });
+                          });
                           
                           console.log("Saved local vehicle data to Firebase");
                       } catch (error) {
@@ -100,12 +98,9 @@
                       }
                   }
 
-                  const reminderDocRef = doc(db, "reminders", user.uid); // Directly access the document using the user's UID
-
-                  getDoc(reminderDocRef)
-                      .then((docSnap) => {
-                          if (docSnap.exists()) {
-                              const data = docSnap.data();
+                  getReminders()
+                      .then((data) => {
+                          if (data && Object.keys(data).length > 0) {
                               let vehicleData = null;
                               
                               // Check if using new multi-vehicle structure
@@ -149,9 +144,9 @@
                                   motReminderDate.setMonth(motReminderDate.getMonth() - 3);
                                   
                                   // Update the database with the calculated reminder date
-                                  setDoc(reminderDocRef, {
+                                  setReminders({
                                       motReminderDate: motReminderDate.toISOString()
-                                  }, { merge: true }).catch(error => {
+                                  }).catch(error => {
                                       console.error("Error updating MOT reminder date:", error);
                                   });
                               } else if (motExpiryDate && motReminderDate) {
@@ -255,17 +250,10 @@
                   if (taxDueDateText !== "no due date" && new Date(taxReminderDateInput) < taxDueDate) {
                       const taxReminderDate = new Date(taxReminderDateInput);
                       const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
-                      const reminderRef = doc(db, "reminders", user.uid);
-
                       try {
-                          // Get current document to preserve existing vehicle data
-                          const docSnap = await getDoc(reminderRef);
-                          let vehicles = {};
-                          
-                          if (docSnap.exists()) {
-                              const data = docSnap.data();
-                              vehicles = data.vehicles || {};
-                          }
+                          // Get current vehicles to preserve other entries
+                          const currentData = await getReminders();
+                          let vehicles = currentData.vehicles || {};
                           
                           // Update or create the vehicle entry
                           if (!vehicles[selectedVehicle]) {
@@ -277,11 +265,7 @@
                               taxReminderDate: taxReminderDate.toISOString()
                           };
                           
-                          await setDoc(reminderRef, {
-                              email: user.email,
-                              userID: user.uid,
-                              vehicles: vehicles
-                          }, { merge: true });
+                          await setReminders({ email: user.email, userID: user.uid, vehicles });
 
                           alert("Your Tax reminder has been set.");
                           window.location.href = "/setdate";

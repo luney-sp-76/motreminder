@@ -1,4 +1,5 @@
-import { auth, db } from "/js/firebase-init.js?v=2";
+import { auth } from "/js/firebase-init.js?v=2";
+import { patchReminders, deleteReminders, deleteUserDoc, getReminders } from "/js/reminders-api.js";
 import {
     updateEmail,
     updatePassword,
@@ -8,7 +9,7 @@ import {
     EmailAuthProvider,
     getAuth
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { doc,collection,query,where,updateDoc, deleteDoc, getFirestore, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
 
 auth.onAuthStateChanged((user) => {
     if (user) {
@@ -32,17 +33,15 @@ document.getElementById('updateEmailBtn').addEventListener('click', () => {
     }
     updateEmail(user, newEmail).then(() => {
         console.log("Email updated successfully.");
-        // Update email in Firestore
-        const userDocRef = doc(db, "reminders", user.uid);
-        updateDoc(userDocRef, {
-            email: newEmail
-        }).then(() => {
-            showAlert('Email updated successfully.', 'success');
-            console.log("Firestore email updated successfully.");
-        }).catch((error) => {
-            showAlert("Error updating email: ", error);
-            console.error("Error updating email in Firestore: ", error);
-        });
+        // Update email in Firestore via backend API
+        patchReminders({ email: newEmail })
+            .then(() => {
+                showAlert('Email updated successfully.', 'success');
+                console.log("Firestore email updated successfully.");
+            }).catch((error) => {
+                showAlert("Error updating email: ", error);
+                console.error("Error updating email in Firestore: ", error);
+            });
     }).catch((error) => {
         showAlert("Error updating email: ", error);
         console.error("Error updating email: ", error);
@@ -96,10 +95,8 @@ document.getElementById('updateCarRegBtn').addEventListener('click', () => {
         return; // Stop the function if the email is not valid
     }
 
-    const userDocRef = doc(db, "reminders", user.uid);
-    updateDoc(userDocRef, {
-        regNumber: newCarRegistration
-    }).then(() => {
+    patchReminders({ regNumber: newCarRegistration })
+    .then(() => {
         showAlert('Car registration updated successfully.', 'success');
         console.log("Car registration updated successfully.");
     }).catch((error) => {
@@ -109,8 +106,7 @@ document.getElementById('updateCarRegBtn').addEventListener('click', () => {
 });
 
 document.getElementById('closeAccountBtn').addEventListener('click', () => {
-    const userDocRef = doc(db, "users", user.uid);
-    deleteDoc(userDocRef).then(() => {
+    deleteUserDoc().then(() => {
         showAlert('Account closed successfully.', 'success');
         console.log("Account closed successfully.");
     }).catch((error) => {
@@ -125,13 +121,11 @@ document.getElementById('gdprDataRequestBtn').addEventListener('click', () => {
 
     if (auth.currentUser) {
         const userId = auth.currentUser.uid;
-        const docRef = doc(db, "reminders", userId); // Directly use userId as the document ID
-
-        getDoc(docRef)
-            .then(docSnap => {
-                if (docSnap.exists()) {
-                    console.log("User reminder data:", docSnap.data());
-                    generatePDF([docSnap.data()]);  // Assuming you might want to still use PDF generation
+        getReminders()
+            .then(data => {
+                if (data && Object.keys(data).length > 0) {
+                    console.log("User reminder data:", data);
+                    generatePDF([data]);
                 } else {
                     showAlert("No reminders data found for user.", "warning");
                     console.log("No reminders data found for user.");

@@ -264,8 +264,8 @@
   </script>
 
   <script type="module">
-    import { auth, db } from '/js/firebase-init.js?v=2';
-    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { auth } from '/js/firebase-init.js?v=2';
+    import { getReminders, setReminders } from '/js/reminders-api.js';
 
     // Auto-save vehicle data and load reminder information
     document.addEventListener('DOMContentLoaded', () => {
@@ -275,14 +275,12 @@
           if (vehicleDataString) {
             try {
               const vehicleData = JSON.parse(vehicleDataString);
-              const userDocRef = doc(db, "reminders", user.uid);
-              
-              // Save vehicle to the multi-vehicle structure
-              await setDoc(userDocRef, {
+              // Save vehicle via backend API (no direct Firestore connection)
+              await setReminders({
                 email: user.email,
                 userID: user.uid,
                 [`vehicles.${vehicleData.regNumber}`]: vehicleData
-              }, { merge: true });
+              });
               
               console.log(`Vehicle ${vehicleData.regNumber} saved to Firebase`);
               
@@ -336,16 +334,15 @@
 
     async function loadReminderInformation(user, vehicleRegNumber) {
       try {
-        const userDocRef = doc(db, "reminders", user.uid);
-        const docSnap = await getDoc(userDocRef);
-        
+        const data = await getReminders();
+
         let motReminderDate = null;
         let taxReminderDate = null;
         let motExpiryDate = null;
         let taxDueDate = null;
         
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+        if (data && Object.keys(data).length > 0) {
+          {
           
           // Check multi-vehicle structure first
           if (data.vehicles && data.vehicles[vehicleRegNumber]) {
