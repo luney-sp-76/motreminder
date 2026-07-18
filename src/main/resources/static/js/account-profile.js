@@ -142,12 +142,6 @@ document.getElementById('gdprDataRequestBtn').addEventListener('click', () => {
 });
 
 
-function fetchUserData(db, userId, collectionName) {
-    const queryRef = collection(db, collectionName);
-    const q = query(queryRef, where("userID", "==", userId));
-    return getDoc(q).then(querySnapshot => querySnapshot.docs.map(doc => doc.data()));
-}
-
 // Call this function when a request is completed
 function showAlert(message, type) {
     const alertPlaceholder = document.getElementById('alert-placeholder');
