@@ -275,11 +275,20 @@
           if (vehicleDataString) {
             try {
               const vehicleData = JSON.parse(vehicleDataString);
-              // Save vehicle via backend API (no direct Firestore connection)
+              // Update only DVLA fields — individual field paths preserve stored reminder dates
+              const reg = vehicleData.regNumber;
               await setReminders({
                 email: user.email,
                 userID: user.uid,
-                [`vehicles.${vehicleData.regNumber}`]: vehicleData
+                [`vehicles.${reg}.regNumber`]:   reg,
+                [`vehicles.${reg}.motExpiryDate`]: vehicleData.motExpiryDate,
+                [`vehicles.${reg}.taxDueDate`]:    vehicleData.taxDueDate,
+                [`vehicles.${reg}.make`]:          vehicleData.make,
+                [`vehicles.${reg}.colour`]:        vehicleData.colour,
+                [`vehicles.${reg}.year`]:          vehicleData.year,
+                [`vehicles.${reg}.fuel`]:          vehicleData.fuel,
+                [`vehicles.${reg}.engineSize`]:    vehicleData.engineSize,
+                [`vehicles.${reg}.motStatus`]:     vehicleData.motStatus
               });
               
               console.log(`Vehicle ${vehicleData.regNumber} saved to Firebase`);

@@ -55,6 +55,24 @@
           <a href="/setreminder" class="btn btn-primary mt-3" id="changeTaxDateBtn">Change Date</a>
         </div>
       </div>
+
+      <div class="row">
+        <div class="container text-center mt-5">
+          <h1>Booked MOT Date</h1>
+          <p id="displayMotBookingDate" class="lead">Not recorded</p>
+          <form id="motBookingForm">
+            <div class="form-group">
+              <label for="motBookingDate">Date you have booked your MOT:</label>
+              <input type="date" id="motBookingDate" class="form-control" required>
+            </div>
+            <button type="button" class="btn btn-success" id="setMotBookingDateBtn">Save Booking Date</button>
+            <button type="button" class="btn btn-outline-secondary ml-2" id="clearMotBookingDateBtn">Clear</button>
+          </form>
+          <small class="text-muted mt-2 d-block">
+            We will send you a follow-up email after your appointment to help you set next year's reminder.
+          </small>
+        </div>
+      </div>
     </div>
     
     <script type="module">
@@ -289,6 +307,56 @@
     </script>
     
     <!-- Include Bootstrap JavaScript and dependencies -->
+
+    <script type="module">
+      import { auth } from '/js/firebase-init.js?v=2';
+      import { getReminders, patchReminders } from '/js/reminders-api.js';
+
+      document.addEventListener("DOMContentLoaded", () => {
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) return;
+          const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
+
+          // Load and display existing booking date
+          try {
+            const data = await getReminders();
+            const booking = data.vehicles?.[selectedVehicle]?.motBookingDate;
+            if (booking) {
+              const d = new Date(booking);
+              document.getElementById("displayMotBookingDate").innerText =
+                "Booked for: " + d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+              document.getElementById("motBookingDate").value = booking.substring(0, 10);
+            }
+          } catch (e) { console.error("Error loading booking date:", e); }
+
+          // Save booking date
+          document.getElementById("setMotBookingDateBtn").addEventListener("click", async () => {
+            const dateVal = document.getElementById("motBookingDate").value;
+            if (!dateVal) { alert("Please select a date."); return; }
+            try {
+              await patchReminders({ [`vehicles.${selectedVehicle}.motBookingDate`]: dateVal });
+              document.getElementById("displayMotBookingDate").innerText =
+                "Booked for: " + new Date(dateVal).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+              alert("Booking date saved.");
+            } catch (e) {
+              console.error("Error saving booking date:", e);
+              alert("Failed to save booking date.");
+            }
+          });
+
+          // Clear booking date
+          document.getElementById("clearMotBookingDateBtn").addEventListener("click", async () => {
+            try {
+              await patchReminders({ [`vehicles.${selectedVehicle}.motBookingDate`]: null });
+              document.getElementById("displayMotBookingDate").innerText = "Not recorded";
+              document.getElementById("motBookingDate").value = "";
+            } catch (e) {
+              console.error("Error clearing booking date:", e);
+            }
+          });
+        });
+      });
+    </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
