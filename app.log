@@ -8,15 +8,15 @@
 
  :: Spring Boot ::               (v3.5.16)
 
-2026-07-18T20:01:54.795+01:00  INFO 98376 --- [           main] c.m.restservice.RestServiceApplication   : Starting RestServiceApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 98376 (/Users/paulolphert/git_repo/motreminder/target/rest-service-0.0.1-SNAPSHOT.jar started by paulolphert in /Users/paulolphert/git_repo/motreminder)
-2026-07-18T20:01:54.796+01:00 DEBUG 98376 --- [           main] c.m.restservice.RestServiceApplication   : Running with Spring Boot v3.5.16, Spring v6.2.19
-2026-07-18T20:01:54.796+01:00  INFO 98376 --- [           main] c.m.restservice.RestServiceApplication   : No active profile set, falling back to 1 default profile: "default"
-2026-07-18T20:01:55.419+01:00  INFO 98376 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
-2026-07-18T20:01:55.428+01:00  INFO 98376 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-07-18T20:01:55.428+01:00  INFO 98376 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
-2026-07-18T20:01:55.450+01:00  INFO 98376 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-07-18T20:01:55.450+01:00  INFO 98376 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 614 ms
+2026-07-18T20:06:45.619+01:00  INFO 4153 --- [           main] c.m.restservice.RestServiceApplication   : Starting RestServiceApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 4153 (/Users/paulolphert/git_repo/motreminder/target/rest-service-0.0.1-SNAPSHOT.jar started by paulolphert in /Users/paulolphert/git_repo/motreminder)
+2026-07-18T20:06:45.623+01:00 DEBUG 4153 --- [           main] c.m.restservice.RestServiceApplication   : Running with Spring Boot v3.5.16, Spring v6.2.19
+2026-07-18T20:06:45.623+01:00  INFO 4153 --- [           main] c.m.restservice.RestServiceApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-07-18T20:06:46.555+01:00  INFO 4153 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+2026-07-18T20:06:46.567+01:00  INFO 4153 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-18T20:06:46.568+01:00  INFO 4153 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
+2026-07-18T20:06:46.595+01:00  INFO 4153 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-07-18T20:06:46.595+01:00  INFO 4153 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 919 ms
 Firestore has been initialized
-2026-07-18T20:01:55.856+01:00  INFO 98376 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
-2026-07-18T20:01:56.058+01:00  INFO 98376 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
-2026-07-18T20:01:56.074+01:00  INFO 98376 --- [           main] c.m.restservice.RestServiceApplication   : Started RestServiceApplication in 1.559 seconds (process running for 1.858)
+2026-07-18T20:06:47.288+01:00  INFO 4153 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-07-18T20:06:47.536+01:00  INFO 4153 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
+2026-07-18T20:06:47.571+01:00  INFO 4153 --- [           main] c.m.restservice.RestServiceApplication   : Started RestServiceApplication in 2.386 seconds (process running for 2.681)

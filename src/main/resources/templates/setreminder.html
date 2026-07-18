@@ -233,17 +233,15 @@
           const customDate = document.getElementById("motCustomDate").value || document.getElementById("motEarliestDate").value;
           
           const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
-          const reminderRef = doc(db, "reminders", user.uid);
-          const taxDate = localStorage.getItem('taxDate'); // Get the tax date from local storage
-          const motDate = localStorage.getItem('motDate'); // Get the MOT expiry date from local storage
+          const taxDate = localStorage.getItem('taxDate');
+          const motDate = localStorage.getItem('motDate');
           
           try {
-            // Get current document to preserve existing vehicle data
-            const docSnap = await getDoc(reminderRef);
+            const reminderData = await getReminders();
             let vehicles = {};
             
-            if (docSnap_data && Object.keys(docSnap_data).length > 0) {
-              vehicles = docSnap_data.vehicles || {};
+            if (reminderData && Object.keys(reminderData).length > 0) {
+              vehicles = reminderData.vehicles || {};
             }
             
             // Update or create the vehicle entry
@@ -287,16 +285,14 @@
           const customDate = document.getElementById("taxCustomDate").value || document.getElementById("taxEarliestDate").value;
           
           const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
-          const reminderRef = doc(db, "reminders", user.uid);
-          const motDate = localStorage.getItem('motDate'); // Get the MOT expiry date from local storage
+          const motDate = localStorage.getItem('motDate');
           
           try {
-            // Get current document to preserve existing vehicle data
-            const docSnap = await getDoc(reminderRef);
+            const reminderData = await getReminders();
             let vehicles = {};
             
-            if (docSnap_data && Object.keys(docSnap_data).length > 0) {
-              vehicles = docSnap_data.vehicles || {};
+            if (reminderData && Object.keys(reminderData).length > 0) {
+              vehicles = reminderData.vehicles || {};
             }
             
             // Update or create the vehicle entry
