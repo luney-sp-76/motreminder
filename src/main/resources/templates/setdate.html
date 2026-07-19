@@ -98,21 +98,27 @@
                   
                   console.log("Selected vehicle:", selectedVehicle);
                   
-                  // Check if we have local vehicle data that needs to be saved first
+                  // Fire-and-forget: update DVLA fields in background, never block data load
                   const localVehicleData = localStorage.getItem('currentVehicleData');
                   if (localVehicleData) {
                       try {
                           const vehicleData = JSON.parse(localVehicleData);
-                          // Save vehicle via backend API first
-                          await setReminders({
+                          const reg = vehicleData.regNumber;
+                          setReminders({
                               email: user.email,
                               userID: user.uid,
-                              [`vehicles.${vehicleData.regNumber}`]: vehicleData
-                          });
-                          
-                          console.log("Saved local vehicle data to Firebase");
+                              [`vehicles.${reg}.regNumber`]:     reg,
+                              [`vehicles.${reg}.motExpiryDate`]: vehicleData.motExpiryDate,
+                              [`vehicles.${reg}.taxDueDate`]:    vehicleData.taxDueDate,
+                              [`vehicles.${reg}.make`]:          vehicleData.make,
+                              [`vehicles.${reg}.colour`]:        vehicleData.colour,
+                              [`vehicles.${reg}.year`]:          vehicleData.year,
+                              [`vehicles.${reg}.fuel`]:          vehicleData.fuel,
+                              [`vehicles.${reg}.engineSize`]:    vehicleData.engineSize,
+                              [`vehicles.${reg}.motStatus`]:     vehicleData.motStatus
+                          }).catch(err => console.warn('Background vehicle save failed:', err));
                       } catch (error) {
-                          console.error("Error saving local vehicle data:", error);
+                          console.error("Error parsing local vehicle data:", error);
                       }
                   }
 

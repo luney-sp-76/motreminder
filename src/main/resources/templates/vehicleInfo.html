@@ -267,20 +267,25 @@
     import { auth } from '/js/firebase-init.js?v=2';
     import { getReminders, setReminders } from '/js/reminders-api.js';
 
-    // Auto-save vehicle data and load reminder information
+    // Load reminder information immediately; save DVLA data in background
     document.addEventListener('DOMContentLoaded', () => {
       auth.onAuthStateChanged(async (user) => {
         if (user) {
+          // Determine which vehicle we are looking at
           const vehicleDataString = localStorage.getItem('currentVehicleData');
+          let vehicleRegNumber = null;
+
           if (vehicleDataString) {
             try {
               const vehicleData = JSON.parse(vehicleDataString);
-              // Update only DVLA fields — individual field paths preserve stored reminder dates
+              vehicleRegNumber = vehicleData.regNumber;
+
+              // Fire-and-forget: update DVLA fields in background, never block reminder display
               const reg = vehicleData.regNumber;
-              await setReminders({
+              setReminders({
                 email: user.email,
                 userID: user.uid,
-                [`vehicles.${reg}.regNumber`]:   reg,
+                [`vehicles.${reg}.regNumber`]:     reg,
                 [`vehicles.${reg}.motExpiryDate`]: vehicleData.motExpiryDate,
                 [`vehicles.${reg}.taxDueDate`]:    vehicleData.taxDueDate,
                 [`vehicles.${reg}.make`]:          vehicleData.make,
@@ -289,22 +294,19 @@
                 [`vehicles.${reg}.fuel`]:          vehicleData.fuel,
                 [`vehicles.${reg}.engineSize`]:    vehicleData.engineSize,
                 [`vehicles.${reg}.motStatus`]:     vehicleData.motStatus
-              });
-              
-              console.log(`Vehicle ${vehicleData.regNumber} saved to Firebase`);
-              
-              // Load reminder information after saving
-              await loadReminderInformation(user, vehicleData.regNumber);
-              
+              }).catch(err => console.warn('Background vehicle save failed:', err));
+
             } catch (error) {
-              console.error("Error saving vehicle to Firebase:", error);
+              console.error("Error parsing currentVehicleData:", error);
             }
-          } else {
-            // Try to get vehicle info from URL or localStorage
-            const currentVehicle = getCurrentVehicleFromContext();
-            if (currentVehicle) {
-              await loadReminderInformation(user, currentVehicle);
-            }
+          }
+
+          // Always load reminders — fall back to URL / other localStorage keys if needed
+          if (!vehicleRegNumber) {
+            vehicleRegNumber = getCurrentVehicleFromContext();
+          }
+          if (vehicleRegNumber) {
+            await loadReminderInformation(user, vehicleRegNumber);
           }
         }
       });
