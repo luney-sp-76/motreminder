@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = RestServiceApplication.class)
 class RestServiceApplicationTests {
 
 	@Autowired

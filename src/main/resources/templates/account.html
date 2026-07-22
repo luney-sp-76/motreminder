@@ -73,31 +73,19 @@
     </script>
     <script type="module">
       // Import necessary Firestore functions from the SDK.
-      import { auth, db } from '/js/firebase-init.js';
-      import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { auth } from '/js/firebase-init.js?v=2';
+      import { getReminders } from '/js/reminders-api.js';
       import {formatRegNumber} from '/js/format-regnumber.js';
   
       document.addEventListener("DOMContentLoaded", () => {
           auth.onAuthStateChanged((user) => {
               if (user) {
-                  // Fetch the document using the user's UID.
-                  const reminderDocRef = doc(db, "reminders", user.uid);
-  
-                  getDoc(reminderDocRef).then((docSnap) => {
-                      if (docSnap.exists()) {
-                          // Extract the registration number from the Firestore document.
-                          const currentRegistrationNumber = docSnap.data().regNumber;
-
-                          // Format the registration number correctly.
-                          const formattedRegNumber = formatRegNumber(currentRegistrationNumber);
-
-                          // Log the formatted registration number to the console.
+                  getReminders().then((data) => {
+                      if (data && data.regNumber) {
+                          const formattedRegNumber = formatRegNumber(data.regNumber);
                           console.log("Formatted registration number:", formattedRegNumber);
-  
-                          // Update the header with the current registration number.
                           document.getElementById('updateCarRegHeader').textContent = `Update ${formattedRegNumber} Car Registration Number`;
                       } else {
-                          console.log("Document does not exist");
                           document.getElementById('updateCarRegHeader').textContent = "Update Car Registration Number";
                       }
                   }).catch((error) => {
@@ -105,8 +93,6 @@
                       document.getElementById('updateCarRegHeader').textContent = "Error loading registration number.";
                   });
               } else {
-                  console.log("User is not signed in");
-                  // Redirect to login page if the user is not signed in.
                   window.location.href = "/login";
               }
           });
@@ -116,7 +102,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script type ="module" src="/js/firebase-init.js">
+    <script type ="module" src="/js/firebase-init.js?v=2">
     </script>
     <script type ="module" src="/js/account-profile.js">
     </script>

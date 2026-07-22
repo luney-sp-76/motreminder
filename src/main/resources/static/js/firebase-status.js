@@ -1,5 +1,5 @@
 // firebase-status.js
-import { auth } from './firebase-init.js'; // Adjust path as necessary
+import { auth } from './firebase-init.js?v=2'; // Adjust path as necessary
 
 const adjustLoginLogoutLink = () => {
   const loginLink = document.getElementById("loginLink");

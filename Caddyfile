@@ -1,0 +1,9 @@
+motreminder.turtlecastle.uk {
+	@blocked path /.env /.git/* /app/credentials.json /app/service-account.json /config/gcp.json /credentials.json /service-account.json
+	respond @blocked 404
+	reverse_proxy 127.0.0.1:8082
+}
+
+homeassistant.turtlecastle.uk {
+	reverse_proxy 192.168.4.160:8123
+}

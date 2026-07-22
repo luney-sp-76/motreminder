@@ -55,6 +55,24 @@
           <a href="/setreminder" class="btn btn-primary mt-3" id="changeTaxDateBtn">Change Date</a>
         </div>
       </div>
+
+      <div class="row">
+        <div class="container text-center mt-5">
+          <h1>Booked MOT Date</h1>
+          <p id="displayMotBookingDate" class="lead">Not recorded</p>
+          <form id="motBookingForm">
+            <div class="form-group">
+              <label for="motBookingDate">Date you have booked your MOT:</label>
+              <input type="date" id="motBookingDate" class="form-control" required>
+            </div>
+            <button type="button" class="btn btn-success" id="setMotBookingDateBtn">Save Booking Date</button>
+            <button type="button" class="btn btn-outline-secondary ml-2" id="clearMotBookingDateBtn">Clear</button>
+          </form>
+          <small class="text-muted mt-2 d-block">
+            We will send you a follow-up email after your appointment to help you set next year's reminder.
+          </small>
+        </div>
+      </div>
     </div>
     
     <script type="module">
@@ -63,8 +81,8 @@
     </script>
 
     <script type="module">
-      import { auth, db } from '/js/firebase-init.js';
-      import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      import { auth } from '/js/firebase-init.js?v=2';
+      import { getReminders, setReminders } from '/js/reminders-api.js';
       import { formatDateToDDMMMYYYY } from '/js/formatDateToDDMMYYYY.js';
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -80,32 +98,33 @@
                   
                   console.log("Selected vehicle:", selectedVehicle);
                   
-                  // Check if we have local vehicle data that needs to be saved first
+                  // Fire-and-forget: update DVLA fields in background, never block data load
                   const localVehicleData = localStorage.getItem('currentVehicleData');
                   if (localVehicleData) {
                       try {
                           const vehicleData = JSON.parse(localVehicleData);
-                          const userDocRef = doc(db, "reminders", user.uid);
-                          
-                          // Save vehicle to Firebase first
-                          await setDoc(userDocRef, {
+                          const reg = vehicleData.regNumber;
+                          setReminders({
                               email: user.email,
                               userID: user.uid,
-                              [`vehicles.${vehicleData.regNumber}`]: vehicleData
-                          }, { merge: true });
-                          
-                          console.log("Saved local vehicle data to Firebase");
+                              [`vehicles.${reg}.regNumber`]:     reg,
+                              [`vehicles.${reg}.motExpiryDate`]: vehicleData.motExpiryDate,
+                              [`vehicles.${reg}.taxDueDate`]:    vehicleData.taxDueDate,
+                              [`vehicles.${reg}.make`]:          vehicleData.make,
+                              [`vehicles.${reg}.colour`]:        vehicleData.colour,
+                              [`vehicles.${reg}.year`]:          vehicleData.year,
+                              [`vehicles.${reg}.fuel`]:          vehicleData.fuel,
+                              [`vehicles.${reg}.engineSize`]:    vehicleData.engineSize,
+                              [`vehicles.${reg}.motStatus`]:     vehicleData.motStatus
+                          }).catch(err => console.warn('Background vehicle save failed:', err));
                       } catch (error) {
-                          console.error("Error saving local vehicle data:", error);
+                          console.error("Error parsing local vehicle data:", error);
                       }
                   }
 
-                  const reminderDocRef = doc(db, "reminders", user.uid); // Directly access the document using the user's UID
-
-                  getDoc(reminderDocRef)
-                      .then((docSnap) => {
-                          if (docSnap.exists()) {
-                              const data = docSnap.data();
+                  getReminders()
+                      .then((data) => {
+                          if (data && Object.keys(data).length > 0) {
                               let vehicleData = null;
                               
                               // Check if using new multi-vehicle structure
@@ -149,9 +168,9 @@
                                   motReminderDate.setMonth(motReminderDate.getMonth() - 3);
                                   
                                   // Update the database with the calculated reminder date
-                                  setDoc(reminderDocRef, {
+                                  setReminders({
                                       motReminderDate: motReminderDate.toISOString()
-                                  }, { merge: true }).catch(error => {
+                                  }).catch(error => {
                                       console.error("Error updating MOT reminder date:", error);
                                   });
                               } else if (motExpiryDate && motReminderDate) {
@@ -165,9 +184,9 @@
                                   
                                   if (daysDiff > 7) { // If more than 7 days difference, update
                                       motReminderDate = calculatedReminderDate;
-                                      setDoc(reminderDocRef, {
+                                      setReminders({
                                           motReminderDate: motReminderDate.toISOString()
-                                      }, { merge: true }).catch(error => {
+                                      }).catch(error => {
                                           console.error("Error updating MOT reminder date:", error);
                                       });
                                   }
@@ -255,17 +274,10 @@
                   if (taxDueDateText !== "no due date" && new Date(taxReminderDateInput) < taxDueDate) {
                       const taxReminderDate = new Date(taxReminderDateInput);
                       const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
-                      const reminderRef = doc(db, "reminders", user.uid);
-
                       try {
-                          // Get current document to preserve existing vehicle data
-                          const docSnap = await getDoc(reminderRef);
-                          let vehicles = {};
-                          
-                          if (docSnap.exists()) {
-                              const data = docSnap.data();
-                              vehicles = data.vehicles || {};
-                          }
+                          // Get current vehicles to preserve other entries
+                          const currentData = await getReminders();
+                          let vehicles = currentData.vehicles || {};
                           
                           // Update or create the vehicle entry
                           if (!vehicles[selectedVehicle]) {
@@ -277,11 +289,7 @@
                               taxReminderDate: taxReminderDate.toISOString()
                           };
                           
-                          await setDoc(reminderRef, {
-                              email: user.email,
-                              userID: user.uid,
-                              vehicles: vehicles
-                          }, { merge: true });
+                          await setReminders({ email: user.email, userID: user.uid, vehicles });
 
                           alert("Your Tax reminder has been set.");
                           window.location.href = "/setdate";
@@ -305,6 +313,56 @@
     </script>
     
     <!-- Include Bootstrap JavaScript and dependencies -->
+
+    <script type="module">
+      import { auth } from '/js/firebase-init.js?v=2';
+      import { getReminders, patchReminders } from '/js/reminders-api.js';
+
+      document.addEventListener("DOMContentLoaded", () => {
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) return;
+          const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
+
+          // Load and display existing booking date
+          try {
+            const data = await getReminders();
+            const booking = data.vehicles?.[selectedVehicle]?.motBookingDate;
+            if (booking) {
+              const d = new Date(booking);
+              document.getElementById("displayMotBookingDate").innerText =
+                "Booked for: " + d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+              document.getElementById("motBookingDate").value = booking.substring(0, 10);
+            }
+          } catch (e) { console.error("Error loading booking date:", e); }
+
+          // Save booking date
+          document.getElementById("setMotBookingDateBtn").addEventListener("click", async () => {
+            const dateVal = document.getElementById("motBookingDate").value;
+            if (!dateVal) { alert("Please select a date."); return; }
+            try {
+              await patchReminders({ [`vehicles.${selectedVehicle}.motBookingDate`]: dateVal });
+              document.getElementById("displayMotBookingDate").innerText =
+                "Booked for: " + new Date(dateVal).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+              alert("Booking date saved.");
+            } catch (e) {
+              console.error("Error saving booking date:", e);
+              alert("Failed to save booking date.");
+            }
+          });
+
+          // Clear booking date
+          document.getElementById("clearMotBookingDateBtn").addEventListener("click", async () => {
+            try {
+              await patchReminders({ [`vehicles.${selectedVehicle}.motBookingDate`]: null });
+              document.getElementById("displayMotBookingDate").innerText = "Not recorded";
+              document.getElementById("motBookingDate").value = "";
+            } catch (e) {
+              console.error("Error clearing booking date:", e);
+            }
+          });
+        });
+      });
+    </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

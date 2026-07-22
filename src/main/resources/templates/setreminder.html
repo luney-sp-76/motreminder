@@ -219,8 +219,8 @@
   });
 </script>
 <script type="module">
-  import { auth, db } from '/js/firebase-init.js'; 
-  import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { auth } from '/js/firebase-init.js?v=2';
+  import { getReminders, setReminders } from '/js/reminders-api.js';
 
   document.addEventListener("DOMContentLoaded", () => {
     const setMotReminderBtn = document.getElementById("setMotReminderBtn");
@@ -233,18 +233,15 @@
           const customDate = document.getElementById("motCustomDate").value || document.getElementById("motEarliestDate").value;
           
           const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
-          const reminderRef = doc(db, "reminders", user.uid);
-          const taxDate = localStorage.getItem('taxDate'); // Get the tax date from local storage
-          const motDate = localStorage.getItem('motDate'); // Get the MOT expiry date from local storage
+          const taxDate = localStorage.getItem('taxDate');
+          const motDate = localStorage.getItem('motDate');
           
           try {
-            // Get current document to preserve existing vehicle data
-            const docSnap = await getDoc(reminderRef);
+            const reminderData = await getReminders();
             let vehicles = {};
             
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              vehicles = data.vehicles || {};
+            if (reminderData && Object.keys(reminderData).length > 0) {
+              vehicles = reminderData.vehicles || {};
             }
             
             // Update or create the vehicle entry
@@ -261,11 +258,7 @@
             };
             
             // Update the specific vehicle in the vehicles collection
-            await setDoc(reminderRef, {
-              email: user.email,
-              userID: user.uid,
-              vehicles: vehicles
-            }, { merge: true });
+            await setReminders({ email: user.email, userID: user.uid, vehicles });
 
             // Store the reminder date for this specific vehicle
             localStorage.setItem(`${selectedVehicle}_motReminderDate`, customDate);
@@ -292,17 +285,14 @@
           const customDate = document.getElementById("taxCustomDate").value || document.getElementById("taxEarliestDate").value;
           
           const selectedVehicle = localStorage.getItem("selectedVehicleForReminder") || localStorage.getItem("regNumber");
-          const reminderRef = doc(db, "reminders", user.uid);
-          const motDate = localStorage.getItem('motDate'); // Get the MOT expiry date from local storage
+          const motDate = localStorage.getItem('motDate');
           
           try {
-            // Get current document to preserve existing vehicle data
-            const docSnap = await getDoc(reminderRef);
+            const reminderData = await getReminders();
             let vehicles = {};
             
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              vehicles = data.vehicles || {};
+            if (reminderData && Object.keys(reminderData).length > 0) {
+              vehicles = reminderData.vehicles || {};
             }
             
             // Update or create the vehicle entry
@@ -318,11 +308,7 @@
             };
             
             // Update the specific vehicle in the vehicles collection
-            await setDoc(reminderRef, {
-              email: user.email,
-              userID: user.uid,
-              vehicles: vehicles
-            }, { merge: true });
+            await setReminders({ email: user.email, userID: user.uid, vehicles });
 
             // Store the reminder date for this specific vehicle
             localStorage.setItem(`${selectedVehicle}_taxReminderDate`, customDate);

@@ -229,13 +229,13 @@
       </div>
     </div>
   </body>
-  <script type="module" src="/js/firebase-init.js"></script>
+  <script type="module" src="/js/firebase-init.js?v=2"></script>
   <script type="module">
-    import { auth } from '/js/firebase-init.js'
+    import { auth } from '/js/firebase-init.js?v=2'
 
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js'
 
-    function handleSetReminderClick() {
+    window.handleSetReminderClick = function() {
       onAuthStateChanged(auth, (user) => {
         if (user) {
           // Store the current vehicle registration for reminder setting
@@ -264,40 +264,49 @@
   </script>
 
   <script type="module">
-    import { auth, db } from '/js/firebase-init.js';
-    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { auth } from '/js/firebase-init.js?v=2';
+    import { getReminders, setReminders } from '/js/reminders-api.js';
 
-    // Auto-save vehicle data and load reminder information
+    // Load reminder information immediately; save DVLA data in background
     document.addEventListener('DOMContentLoaded', () => {
       auth.onAuthStateChanged(async (user) => {
         if (user) {
+          // Determine which vehicle we are looking at
           const vehicleDataString = localStorage.getItem('currentVehicleData');
+          let vehicleRegNumber = null;
+
           if (vehicleDataString) {
             try {
               const vehicleData = JSON.parse(vehicleDataString);
-              const userDocRef = doc(db, "reminders", user.uid);
-              
-              // Save vehicle to the multi-vehicle structure
-              await setDoc(userDocRef, {
+              vehicleRegNumber = vehicleData.regNumber;
+
+              // Fire-and-forget: update DVLA fields in background, never block reminder display
+              const reg = vehicleData.regNumber;
+              setReminders({
                 email: user.email,
                 userID: user.uid,
-                [`vehicles.${vehicleData.regNumber}`]: vehicleData
-              }, { merge: true });
-              
-              console.log(`Vehicle ${vehicleData.regNumber} saved to Firebase`);
-              
-              // Load reminder information after saving
-              await loadReminderInformation(user, vehicleData.regNumber);
-              
+                [`vehicles.${reg}.regNumber`]:     reg,
+                [`vehicles.${reg}.motExpiryDate`]: vehicleData.motExpiryDate,
+                [`vehicles.${reg}.taxDueDate`]:    vehicleData.taxDueDate,
+                [`vehicles.${reg}.make`]:          vehicleData.make,
+                [`vehicles.${reg}.colour`]:        vehicleData.colour,
+                [`vehicles.${reg}.year`]:          vehicleData.year,
+                [`vehicles.${reg}.fuel`]:          vehicleData.fuel,
+                [`vehicles.${reg}.engineSize`]:    vehicleData.engineSize,
+                [`vehicles.${reg}.motStatus`]:     vehicleData.motStatus
+              }).catch(err => console.warn('Background vehicle save failed:', err));
+
             } catch (error) {
-              console.error("Error saving vehicle to Firebase:", error);
+              console.error("Error parsing currentVehicleData:", error);
             }
-          } else {
-            // Try to get vehicle info from URL or localStorage
-            const currentVehicle = getCurrentVehicleFromContext();
-            if (currentVehicle) {
-              await loadReminderInformation(user, currentVehicle);
-            }
+          }
+
+          // Always load reminders — fall back to URL / other localStorage keys if needed
+          if (!vehicleRegNumber) {
+            vehicleRegNumber = getCurrentVehicleFromContext();
+          }
+          if (vehicleRegNumber) {
+            await loadReminderInformation(user, vehicleRegNumber);
           }
         }
       });
@@ -336,36 +345,88 @@
 
     async function loadReminderInformation(user, vehicleRegNumber) {
       try {
-        const userDocRef = doc(db, "reminders", user.uid);
-        const docSnap = await getDoc(userDocRef);
-        
+        const data = await getReminders();
+
         let motReminderDate = null;
         let taxReminderDate = null;
         let motExpiryDate = null;
         let taxDueDate = null;
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          
+
+        if (data && Object.keys(data).length > 0) {
           // Check multi-vehicle structure first
-          if (data.vehicles && data.vehicles[vehicleRegNumber]) {
-            const vehicleData = data.vehicles[vehicleRegNumber];
+          let vehicleData = data.vehicles && data.vehicles[vehicleRegNumber];
+
+          // Fallback: find vehicle by regNumber field (handles mismatched keys)
+          if (!vehicleData && data.vehicles) {
+            vehicleData = Object.values(data.vehicles)
+              .find(v => v && v.regNumber === vehicleRegNumber);
+          }
+
+          // Legacy single-vehicle structure
+          if (!vehicleData && data.regNumber === vehicleRegNumber) {
+            vehicleData = data;
+          }
+
+          if (vehicleData) {
             motReminderDate = vehicleData.motReminderDate ? new Date(vehicleData.motReminderDate) : null;
             taxReminderDate = vehicleData.taxReminderDate ? new Date(vehicleData.taxReminderDate) : null;
-            motExpiryDate = vehicleData.motExpiryDate ? new Date(vehicleData.motExpiryDate) : null;
-            taxDueDate = vehicleData.taxDueDate ? new Date(vehicleData.taxDueDate) : null;
-          } else if (data.regNumber === vehicleRegNumber) {
-            // Legacy single vehicle structure
-            motReminderDate = data.motReminderDate ? new Date(data.motReminderDate) : null;
-            taxReminderDate = data.taxReminderDate ? new Date(data.taxReminderDate) : null;
-            motExpiryDate = data.motExpiryDate ? new Date(data.motExpiryDate) : null;
-            taxDueDate = data.taxDueDate ? new Date(data.taxDueDate) : null;
+            motExpiryDate   = vehicleData.motExpiryDate   ? new Date(vehicleData.motExpiryDate)   : null;
+            taxDueDate      = vehicleData.taxDueDate      ? new Date(vehicleData.taxDueDate)      : null;
           }
         }
-        
+
+        // ── localStorage migration ─────────────────────────────────────────
+        // If Firestore is missing reminder dates, check localStorage (set by
+        // older code paths or during Safari CORS failures) and migrate them.
+        const lsMotReminder = localStorage.getItem(`${vehicleRegNumber}_motReminderDate`);
+        const lsTaxReminder = localStorage.getItem(`${vehicleRegNumber}_taxReminderDate`);
+        const lsMotDate     = localStorage.getItem(`${vehicleRegNumber}_motDate`);
+        const lsTaxDate     = localStorage.getItem(`${vehicleRegNumber}_taxDate`);
+
+        // Legacy single-key fallback
+        const legacyReminder = localStorage.getItem('reminderDate');
+        const legacyRegNum   = localStorage.getItem('regNumber');
+
+        let migrationNeeded = false;
+        const migrationPayload = {};
+
+        if (!motReminderDate && lsMotReminder) {
+          motReminderDate = new Date(lsMotReminder);
+          migrationPayload[`vehicles.${vehicleRegNumber}.motReminderDate`] = lsMotReminder;
+          migrationNeeded = true;
+        } else if (!motReminderDate && legacyReminder && legacyRegNum === vehicleRegNumber) {
+          motReminderDate = new Date(legacyReminder);
+          migrationPayload[`vehicles.${vehicleRegNumber}.motReminderDate`] = legacyReminder;
+          migrationNeeded = true;
+        }
+        if (!taxReminderDate && lsTaxReminder) {
+          taxReminderDate = new Date(lsTaxReminder);
+          migrationPayload[`vehicles.${vehicleRegNumber}.taxReminderDate`] = lsTaxReminder;
+          migrationNeeded = true;
+        }
+        if (!motExpiryDate && lsMotDate) {
+          motExpiryDate = new Date(lsMotDate);
+          migrationPayload[`vehicles.${vehicleRegNumber}.motExpiryDate`] = lsMotDate;
+          migrationNeeded = true;
+        }
+        if (!taxDueDate && lsTaxDate) {
+          taxDueDate = new Date(lsTaxDate);
+          migrationPayload[`vehicles.${vehicleRegNumber}.taxDueDate`] = lsTaxDate;
+          migrationNeeded = true;
+        }
+
+        if (migrationNeeded) {
+          console.log(`Migrating localStorage reminder data for ${vehicleRegNumber} to Firestore`);
+          migrationPayload.email = user.email;
+          migrationPayload.userID = user.uid;
+          setReminders(migrationPayload)
+            .catch(err => console.warn('Reminder migration save failed:', err));
+        }
+        // ──────────────────────────────────────────────────────────────────
+
         updateReminderDisplay(motReminderDate, taxReminderDate, motExpiryDate, taxDueDate);
         updateReminderButton(motReminderDate, taxReminderDate);
-        
+
       } catch (error) {
         console.error("Error loading reminder information:", error);
         displayReminderError();

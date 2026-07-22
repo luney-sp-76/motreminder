@@ -1,0 +1,93 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+2026-07-19T07:34:34.396+01:00  INFO 29123 --- [           main] c.m.restservice.RestServiceApplication   : Starting RestServiceApplication v0.0.1-SNAPSHOT using Java 25.0.2 with PID 29123 (/Users/paulolphert/git_repo/motreminder/target/rest-service-0.0.1-SNAPSHOT.jar started by paulolphert in /Users/paulolphert/git_repo/motreminder)
+2026-07-19T07:34:34.397+01:00 DEBUG 29123 --- [           main] c.m.restservice.RestServiceApplication   : Running with Spring Boot v3.5.16, Spring v6.2.19
+2026-07-19T07:34:34.397+01:00  INFO 29123 --- [           main] c.m.restservice.RestServiceApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-07-19T07:34:35.072+01:00  INFO 29123 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+2026-07-19T07:34:35.084+01:00  INFO 29123 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-19T07:34:35.085+01:00  INFO 29123 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.55]
+2026-07-19T07:34:35.109+01:00  INFO 29123 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-07-19T07:34:35.110+01:00  INFO 29123 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 673 ms
+Firestore has been initialized
+2026-07-19T07:34:35.501+01:00  INFO 29123 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-07-19T07:34:35.705+01:00  INFO 29123 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
+2026-07-19T07:34:35.723+01:00  INFO 29123 --- [           main] c.m.restservice.RestServiceApplication   : Started RestServiceApplication in 1.592 seconds (process running for 1.897)
+2026-07-19T07:35:02.520+01:00  INFO 29123 --- [omcat-handler-0] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-19T07:35:02.521+01:00  INFO 29123 --- [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-19T07:35:02.527+01:00  INFO 29123 --- [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Completed initialization in 6 ms
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by io.grpc.netty.shaded.io.netty.util.internal.PlatformDependent0$4 (jar:nested:/Users/paulolphert/git_repo/motreminder/target/rest-service-0.0.1-SNAPSHOT.jar/!BOOT-INF/lib/grpc-netty-shaded-1.62.2.jar!/)
+WARNING: Please consider reporting this to the maintainers of class io.grpc.netty.shaded.io.netty.util.internal.PlatformDependent0$4
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by io.grpc.netty.shaded.io.netty.util.internal.NativeLibraryUtil in an unnamed module (jar:nested:/Users/paulolphert/git_repo/motreminder/target/rest-service-0.0.1-SNAPSHOT.jar/!BOOT-INF/lib/grpc-netty-shaded-1.62.2.jar!/)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+Email sent successfully!
+2026-07-19T08:15:53.387+01:00  INFO 29123 --- [mcat-handler-89] o.apache.coyote.http11.Http11Processor   : Error parsing HTTP request header
+ Note: further occurrences of HTTP request parsing errors will be logged at DEBUG level.
+
+java.lang.IllegalArgumentException: Invalid character found in method name [0x160x030x010x010x000x010x000x000xfc0x030x030xd10xc8# ]. HTTP method names must be tokens
+	at org.apache.coyote.http11.Http11InputBuffer.parseRequestLine(Http11InputBuffer.java:402) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1797) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at java.base/java.lang.VirtualThread.run(VirtualThread.java:456) ~[na:na]
+
+2026-07-19T12:14:13.124+01:00  WARN 29123 --- [cat-handler-206] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'COPY' is not supported]
+2026-07-19T12:14:13.124+01:00  WARN 29123 --- [cat-handler-208] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'DELETE' is not supported]
+2026-07-19T12:14:13.148+01:00  WARN 29123 --- [cat-handler-209] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'LOCK' is not supported]
+2026-07-19T12:14:13.227+01:00  WARN 29123 --- [cat-handler-210] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'PATCH' is not supported]
+2026-07-19T12:14:13.236+01:00  WARN 29123 --- [cat-handler-211] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'NOEXISTE' is not supported]
+2026-07-19T12:14:13.242+01:00  WARN 29123 --- [cat-handler-212] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'PROPFIND' is not supported]
+2026-07-19T12:14:13.242+01:00  WARN 29123 --- [cat-handler-213] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'PUT' is not supported]
+2026-07-19T12:14:17.294+01:00  WARN 29123 --- [cat-handler-599] o.s.w.s.resource.ResourceHandlerUtils    : "Path contains "../" after call to StringUtils#cleanPath: [................../config.sys]"
+2026-07-19T12:14:20.091+01:00  WARN 29123 --- [at-handler-1036] o.s.w.s.resource.ResourceHandlerUtils    : "Path with "WEB-INF" or "META-INF": [WEB-INF.WEB.xml]"
+2026-07-19T12:14:20.157+01:00  WARN 29123 --- [at-handler-1042] o.s.w.s.resource.ResourceHandlerUtils    : "Path with "WEB-INF" or "META-INF": [WEB-INFWEB.xml]"
+2026-07-19T14:44:06.196+01:00  INFO 29123 --- [at-handler-1332] o.apache.coyote.http11.Http11Processor   : Error parsing HTTP request header
+ Note: further occurrences of HTTP request parsing errors will be logged at DEBUG level.
+
+java.lang.IllegalArgumentException: Invalid character found in method name [0x160x030x010x000xee0x010x000x000xea0x030x0350xfd0x9a0xafD]\O0xf80x1b0xaf0x94K0xe10x830xdc`0xa70xd70xe3'M0xe10xb50xb4D0xf40xff0x150xff0x080xde ]. HTTP method names must be tokens
+	at org.apache.coyote.http11.Http11InputBuffer.parseRequestLine(Http11InputBuffer.java:402) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1797) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at java.base/java.lang.VirtualThread.run(VirtualThread.java:456) ~[na:na]
+
+2026-07-20T04:20:46.258+01:00  INFO 29123 --- [at-handler-1489] o.apache.coyote.http11.Http11Processor   : Error parsing HTTP request header
+ Note: further occurrences of HTTP request parsing errors will be logged at DEBUG level.
+
+java.lang.IllegalArgumentException: Invalid character found in method name [0x160x030x010x000xee0x010x000x000xea0x030x030x890xa30xbe0x9b0x1c0x06B0xfc0x7f0x0b0xd00x7f0xfe0xfd0x0e[0x97{0xaa0x9aZ0xd6\0xc7P?0xbc0xa9|}0x010xa5 ]. HTTP method names must be tokens
+	at org.apache.coyote.http11.Http11InputBuffer.parseRequestLine(Http11InputBuffer.java:402) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1797) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at java.base/java.lang.VirtualThread.run(VirtualThread.java:456) ~[na:na]
+
+2026-07-21T04:50:16.544+01:00  INFO 29123 --- [at-handler-1577] o.apache.coyote.http11.Http11Processor   : Error parsing HTTP request header
+ Note: further occurrences of HTTP request parsing errors will be logged at DEBUG level.
+
+java.lang.IllegalArgumentException: Invalid character found in method name [0x160x030x010x000xee0x010x000x000xea0x030x030xd30xf30xb9Cn0x9cb0x9f0x900x960xa430x830xd6j0xac0xecc0xd310x970x04`0x0d0xb70x03R0xe4#0x04i: ]. HTTP method names must be tokens
+	at org.apache.coyote.http11.Http11InputBuffer.parseRequestLine(Http11InputBuffer.java:402) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1797) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.55.jar!/:na]
+	at java.base/java.lang.VirtualThread.run(VirtualThread.java:456) ~[na:na]
+

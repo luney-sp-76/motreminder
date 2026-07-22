@@ -1,7 +1,7 @@
 package com.motbookingreminder.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
@@ -9,57 +9,232 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.motbookingreminder.utilities.EmailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-/**
- * This class represents a cron job for sending scheduled reminders.
- */
 @Component
-@Service
 public class ReminderCronJob {
 
     @Value("${email}")
     private String senderMail;
 
+    @Value("${app.url}")
+    private String appUrl;
+
     @Autowired
     private EmailService emailService;
 
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    /** Parse a date string that may be ISO-8601 ("2026-04-15T...") or plain "yyyy-MM-dd". */
+    private LocalDate parseDate(Object raw) {
+        if (raw == null) return null;
+        String s = raw.toString();
+        if (s.contains("T")) s = s.substring(0, 10);
+        try {
+            return LocalDate.parse(s, DATE_FMT);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /**
-     * This method is scheduled to run at 02:00 every day and sends reminders for
-     * MOT expiry.
+     * Runs at 02:00 every day.
+     * Sends MOT and tax reminder emails for any vehicle whose reminder date is today.
+     * Supports both the legacy single-vehicle structure and the current multi-vehicle structure.
+     * Emails include a link back to the app to record the booked MOT date.
      */
     @Scheduled(cron = "0 0 2 * * ?")
     public void sendScheduledReminders() {
         Firestore db = FirestoreClient.getFirestore();
         LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        ApiFuture<QuerySnapshot> future = db.collection("reminders").get();
         try {
-            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            List<QueryDocumentSnapshot> documents =
+                    db.collection("reminders").get().get().getDocuments();
+
             for (QueryDocumentSnapshot document : documents) {
-                String reminderDate = document.getString("reminderDate");
-                if (reminderDate != null && LocalDate.parse(reminderDate, formatter).isEqual(today)) {
-                    String email = document.getString("email");
-                    String regNumber = document.getString("regNumber");
-                    String motExpiryDate = document.getString("motExpiryDate");
-                    // Construct the email body
-                    String emailBody = String.format(
-                            "This is a reminder that the MOT for %s expires on %s. Your reminder date is today %s.\n Please book your MoT at the nearest DVA Testing Centre.\n After your MoT why not come back and set a reminder for next time. Thank you for using MoT Booking Reminder.\n https://motbookingreminder.co.uk",
-                            regNumber,
-                            motExpiryDate, reminderDate);
-                    // Send the email
-                    emailService.sendEmail(senderMail, email, "MOT Expiry Reminder", emailBody);
+                String email = document.getString("email");
+                if (email == null) continue;
+
+                // ── Legacy single-vehicle structure ──────────────────────────
+                String legacyReminderDate = document.getString("reminderDate");
+                if (legacyReminderDate != null) {
+                    LocalDate rd = parseDate(legacyReminderDate);
+                    if (rd != null && rd.isEqual(today)) {
+                        String regNumber   = document.getString("regNumber");
+                        String motExpiry   = document.getString("motExpiryDate");
+                        emailService.sendEmail(senderMail, email,
+                                "MOT Expiry Reminder – " + regNumber,
+                                buildMotReminderBody(regNumber, motExpiry, legacyReminderDate));
+                    }
+                }
+
+                // ── Multi-vehicle structure ───────────────────────────────────
+                @SuppressWarnings("unchecked")
+                Map<String, Object> vehicles = (Map<String, Object>) document.get("vehicles");
+                if (vehicles == null) continue;
+
+                for (Map.Entry<String, Object> entry : vehicles.entrySet()) {
+                    String regNumber = entry.getKey();
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> v = (Map<String, Object>) entry.getValue();
+                    if (v == null) continue;
+
+                    // MOT reminder
+                    LocalDate motReminder = parseDate(v.get("motReminderDate"));
+                    if (motReminder != null && motReminder.isEqual(today)) {
+                        String motExpiry = v.get("motExpiryDate") != null
+                                ? parseDate(v.get("motExpiryDate")).format(DATE_FMT) : "unknown";
+                        emailService.sendEmail(senderMail, email,
+                                "MOT Expiry Reminder – " + regNumber,
+                                buildMotReminderBody(regNumber, motExpiry, today.format(DATE_FMT)));
+                    }
+
+                    // Tax reminder
+                    LocalDate taxReminder = parseDate(v.get("taxReminderDate"));
+                    if (taxReminder != null && taxReminder.isEqual(today)) {
+                        String taxDue = v.get("taxDueDate") != null
+                                ? parseDate(v.get("taxDueDate")).format(DATE_FMT) : "unknown";
+                        emailService.sendEmail(senderMail, email,
+                                "Vehicle Tax Reminder – " + regNumber,
+                                buildTaxReminderBody(regNumber, taxDue, today.format(DATE_FMT)));
+                    }
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Runs at 02:30 every day.
+     * Checks whether any booked MOT date has passed.
+     * If so, sends a follow-up email prompting the user to either set a reminder
+     * for next year (if the MOT passed) or book a new date (if it failed).
+     * Clears motBookingDate after sending so the email is only sent once.
+     */
+    @Scheduled(cron = "0 30 2 * * ?")
+    public void checkPassedMotBookings() {
+        Firestore db = FirestoreClient.getFirestore();
+        LocalDate today = LocalDate.now();
+
+        try {
+            List<QueryDocumentSnapshot> documents =
+                    db.collection("reminders").get().get().getDocuments();
+
+            for (QueryDocumentSnapshot document : documents) {
+                String email = document.getString("email");
+                if (email == null) continue;
+
+                @SuppressWarnings("unchecked")
+                Map<String, Object> vehicles = (Map<String, Object>) document.get("vehicles");
+                if (vehicles == null) continue;
+
+                for (Map.Entry<String, Object> entry : vehicles.entrySet()) {
+                    String regNumber = entry.getKey();
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> v = (Map<String, Object>) entry.getValue();
+                    if (v == null) continue;
+
+                    LocalDate bookingDate = parseDate(v.get("motBookingDate"));
+                    if (bookingDate == null || !bookingDate.isBefore(today)) continue;
+
+                    // Booking date has passed — send the follow-up email
+                    emailService.sendEmail(senderMail, email,
+                            "How did your MOT go? – " + regNumber,
+                            buildMotFollowUpBody(regNumber, bookingDate.format(DATE_FMT)));
+
+                    // Clear the booking date so the email is only sent once
+                    db.collection("reminders")
+                            .document(document.getId())
+                            .update("vehicles." + regNumber + ".motBookingDate", FieldValue.delete());
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Checks a single user's vehicles for passed MOT booking dates and sends
+     * follow-up emails. Called by the admin trigger endpoint for manual testing.
+     */
+    public void processUserBookings(String uid) {
+        Firestore db = FirestoreClient.getFirestore();
+        LocalDate today = LocalDate.now();
+        try {
+            com.google.cloud.firestore.DocumentSnapshot doc =
+                    db.collection("reminders").document(uid).get().get();
+            if (!doc.exists()) return;
+
+            String email = doc.getString("email");
+            if (email == null) return;
+
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> vehicles =
+                    (java.util.Map<String, Object>) doc.get("vehicles");
+            if (vehicles == null) return;
+
+            for (java.util.Map.Entry<String, Object> entry : vehicles.entrySet()) {
+                String regNumber = entry.getKey();
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> v = (java.util.Map<String, Object>) entry.getValue();
+                if (v == null) continue;
+
+                LocalDate bookingDate = parseDate(v.get("motBookingDate"));
+                if (bookingDate == null || !bookingDate.isBefore(today)) continue;
+
+                emailService.sendEmail(senderMail, email,
+                        "How did your MOT go? – " + regNumber,
+                        buildMotFollowUpBody(regNumber, bookingDate.format(DATE_FMT)));
+
+                db.collection("reminders").document(uid)
+                        .update("vehicles." + regNumber + ".motBookingDate", FieldValue.delete());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ── Email body builders ───────────────────────────────────────────────────
+
+    private String buildMotReminderBody(String regNumber, String motExpiry, String reminderDate) {
+        return "This is a reminder that the MOT for " + regNumber + " expires on " + motExpiry + ".\n"
+             + "Your reminder date is today, " + reminderDate + ".\n\n"
+             + "Please book your MOT at the nearest testing centre.\n\n"
+             + "Once you have booked, visit the link below to record your booking date.\n"
+             + "We will then send you a follow-up reminder after your appointment to help you\n"
+             + "set next year\'s reminder or rebook if needed.\n\n"
+             + "Record your booked MOT date: " + appUrl + "/setdate\n\n"
+             + "Thank you for using MOT Booking Reminder.\n"
+             + appUrl;
+    }
+
+    private String buildTaxReminderBody(String regNumber, String taxDueDate, String reminderDate) {
+        return "This is a reminder that the vehicle tax for " + regNumber + " is due on " + taxDueDate + ".\n"
+             + "Your reminder date is today, " + reminderDate + ".\n\n"
+             + "Please renew your vehicle tax at https://www.gov.uk/renew-vehicle-tax\n\n"
+             + "Thank you for using MOT Booking Reminder.\n"
+             + appUrl;
+    }
+
+    private String buildMotFollowUpBody(String regNumber, String bookingDate) {
+        return "Your MOT for " + regNumber + " was booked for " + bookingDate + ". We hope it went well!\n\n"
+             + "If your vehicle passed its MOT:\n"
+             + "  Visit " + appUrl + " to set a reminder for next year.\n\n"
+             + "If you need to rebook:\n"
+             + "  Visit " + appUrl + "/setdate to update your booking date and try again.\n\n"
+             + "Thank you for using MOT Booking Reminder.\n"
+             + appUrl;
     }
 }
