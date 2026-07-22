@@ -7,7 +7,9 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.cloud.FirestoreClient;
+import com.motbookingreminder.controller.ReminderCronJob;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,9 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @RequestMapping("/api")
 public class ReminderApiController {
+
+    @Autowired
+    private ReminderCronJob reminderCronJob;
 
     private String verifyToken(HttpServletRequest request) throws Exception {
         String authHeader = request.getHeader("Authorization");
@@ -124,6 +129,24 @@ public class ReminderApiController {
             return ResponseEntity.status(401).build();
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
+     * POST /api/admin/trigger-booking-check
+     * Immediately runs the MOT booking follow-up check for the authenticated user.
+     * Use for testing — set motBookingDate to a past date first.
+     */
+    @PostMapping("/admin/trigger-booking-check")
+    public ResponseEntity<String> triggerBookingCheck(HttpServletRequest request) {
+        try {
+            String uid = verifyToken(request);
+            reminderCronJob.processUserBookings(uid);
+            return ResponseEntity.ok("Booking check triggered for user " + uid);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 

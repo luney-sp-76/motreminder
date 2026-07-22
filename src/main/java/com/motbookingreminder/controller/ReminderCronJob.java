@@ -165,6 +165,47 @@ public class ReminderCronJob {
         }
     }
 
+    /**
+     * Checks a single user's vehicles for passed MOT booking dates and sends
+     * follow-up emails. Called by the admin trigger endpoint for manual testing.
+     */
+    public void processUserBookings(String uid) {
+        Firestore db = FirestoreClient.getFirestore();
+        LocalDate today = LocalDate.now();
+        try {
+            com.google.cloud.firestore.DocumentSnapshot doc =
+                    db.collection("reminders").document(uid).get().get();
+            if (!doc.exists()) return;
+
+            String email = doc.getString("email");
+            if (email == null) return;
+
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> vehicles =
+                    (java.util.Map<String, Object>) doc.get("vehicles");
+            if (vehicles == null) return;
+
+            for (java.util.Map.Entry<String, Object> entry : vehicles.entrySet()) {
+                String regNumber = entry.getKey();
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> v = (java.util.Map<String, Object>) entry.getValue();
+                if (v == null) continue;
+
+                LocalDate bookingDate = parseDate(v.get("motBookingDate"));
+                if (bookingDate == null || !bookingDate.isBefore(today)) continue;
+
+                emailService.sendEmail(senderMail, email,
+                        "How did your MOT go? – " + regNumber,
+                        buildMotFollowUpBody(regNumber, bookingDate.format(DATE_FMT)));
+
+                db.collection("reminders").document(uid)
+                        .update("vehicles." + regNumber + ".motBookingDate", FieldValue.delete());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     // ── Email body builders ───────────────────────────────────────────────────
 
     private String buildMotReminderBody(String regNumber, String motExpiry, String reminderDate) {
