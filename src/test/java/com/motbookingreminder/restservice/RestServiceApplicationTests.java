@@ -7,7 +7,14 @@ import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = RestServiceApplication.class)
+@SpringBootTest(
+     classes = RestServiceApplication.class,
+     properties = {
+        "email=test@example.com",
+        "app.url=http://localhost:8081",
+	"api.key=test-api-key"
+    }
+)
 class RestServiceApplicationTests {
 
 	@Autowired

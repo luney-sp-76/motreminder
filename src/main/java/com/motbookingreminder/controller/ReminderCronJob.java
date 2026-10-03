@@ -91,8 +91,10 @@ public class ReminderCronJob {
                     // MOT reminder
                     LocalDate motReminder = parseDate(v.get("motReminderDate"));
                     if (motReminder != null && motReminder.isEqual(today)) {
-                        String motExpiry = v.get("motExpiryDate") != null
-                                ? parseDate(v.get("motExpiryDate")).format(DATE_FMT) : "unknown";
+                      	LocalDate parsedMotExpiry = parseDate(v.get("motExpiryDate"));
+			String motExpiry = parsedMotExpiry != null
+                                ? parsedMotExpiry.format(DATE_FMT) : "unknown";
+
                         emailService.sendEmail(senderMail, email,
                                 "MOT Expiry Reminder – " + regNumber,
                                 buildMotReminderBody(regNumber, motExpiry, today.format(DATE_FMT)));
@@ -101,8 +103,10 @@ public class ReminderCronJob {
                     // Tax reminder
                     LocalDate taxReminder = parseDate(v.get("taxReminderDate"));
                     if (taxReminder != null && taxReminder.isEqual(today)) {
-                        String taxDue = v.get("taxDueDate") != null
-                                ? parseDate(v.get("taxDueDate")).format(DATE_FMT) : "unknown";
+			LocalDate parsedTaxDue = parseDate(v.get("taxDueDate"));
+                        String taxDue = parsedTaxDue != null
+                                ? parsedTaxDue.format(DATE_FMT) : "unknown";
+
                         emailService.sendEmail(senderMail, email,
                                 "Vehicle Tax Reminder – " + regNumber,
                                 buildTaxReminderBody(regNumber, taxDue, today.format(DATE_FMT)));
