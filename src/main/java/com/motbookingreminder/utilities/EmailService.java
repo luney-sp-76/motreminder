@@ -38,23 +38,26 @@ public class EmailService {
      * @param subject The subject of the email.
      * @param body    The body of the email.
      */
-    public void sendEmail(String from, String to, String subject, String body) {
-        SendEmailRequest sendEmailRequest = SendEmailRequest.builder()
-                .source(from)
-                .destination(Destination.builder().toAddresses(to).build())
-                .message(Message.builder()
-                        .subject(Content.builder().data(subject).build())
-                        .body(Body.builder()
-                                .text(Content.builder().data(body).build())
-                                .build())
-                        .build())
-                .build();
+    public boolean sendEmail(String from, String to, String subject, String body) {
+    SendEmailRequest sendEmailRequest = SendEmailRequest.builder()
+            .source(from)
+            .destination(Destination.builder().toAddresses(to).build())
+            .message(Message.builder()
+                    .subject(Content.builder().data(subject).build())
+                    .body(Body.builder()
+                            .text(Content.builder().data(body).build())
+                            .build())
+                    .build())
+            .build();
 
-        try {
-            sesClient.sendEmail(sendEmailRequest);
-            System.out.println("Email sent successfully!");
-        } catch (SesException e) {
-            System.err.println("Error sending email: " + e.awsErrorDetails().errorMessage());
-        }
+    try {
+        sesClient.sendEmail(sendEmailRequest);
+        System.out.println("Email sent successfully!");
+        return true;
+    } catch (SesException e) {
+        System.err.println("Error sending email: " + e.awsErrorDetails().errorMessage());
+        return false;
     }
+ }
+
 }

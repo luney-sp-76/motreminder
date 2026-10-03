@@ -153,15 +153,17 @@ public class ReminderCronJob {
                     if (bookingDate == null || !bookingDate.isBefore(today)) continue;
 
                     // Booking date has passed — send the follow-up email
-                    emailService.sendEmail(senderMail, email,
+                    boolean sent =  emailService.sendEmail(senderMail, email,
                             "How did your MOT go? – " + regNumber,
                             buildMotFollowUpBody(regNumber, bookingDate.format(DATE_FMT)));
 
                     // Clear the booking date so the email is only sent once
-                    db.collection("reminders")
+                    if (sent) {  
+		        db.collection("reminders")
                             .document(document.getId())
                             .update("vehicles." + regNumber + ".motBookingDate", FieldValue.delete());
-                }
+                    }
+		}
             }
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
